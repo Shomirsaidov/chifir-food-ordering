@@ -67,7 +67,7 @@ onMounted(() => {
 <template>
   <div id="app">
     <RouterView />
-    <CartButton v-if="!$route.path.startsWith('/admin')" />
+    <CartButton v-if="!$route.path.startsWith('/admin') && $route.path !== '/checkout'" />
   </div>
 </template>
 
