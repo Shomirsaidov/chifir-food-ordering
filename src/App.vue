@@ -8,64 +8,59 @@ import { useUserStore } from './stores/user'
 
 const userStore = useUserStore()
 
-onMounted(async () => {
-  // Retry mechanism to wait for Telegram script to load
-  let attempts = 0
-  const maxAttempts = 20 // 2 seconds total
-  
-  const initInterval = setInterval(async () => {
-    attempts++
-    
-    // Check if Telegram is available in window
-    if (typeof window !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-      clearInterval(initInterval)
+onMounted(() => {
+  // Poll for Telegram WebApp environment
+  const checkInterval = setInterval(async () => {
+    if (window.Telegram?.WebApp) {
+      clearInterval(checkInterval) // Found it!
+
+      const tg = window.Telegram.WebApp
+      tg.ready()
+      tg.expand()
       
-      const webApp = window.Telegram.WebApp
-      webApp.ready()
-      webApp.expand()
+      const user = tg.initDataUnsafe?.user
       
-      const telegramUser = webApp.initDataUnsafe?.user
-      
-      if (telegramUser) {
-        userStore.setUser(telegramUser)
+      if (user) {
+        userStore.setUser(user)
         
-        // Sync with Supabase
+        // Sync with Supabase (Fire and forget)
         if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
           try {
             await supabase.from('users').upsert(
               {
-                telegram_id: telegramUser.id,
-                username: telegramUser.username || null,
-                first_name: telegramUser.first_name,
-                last_name: telegramUser.last_name || null,
-                photo_url: telegramUser.photo_url || null,
+                telegram_id: user.id,
+                username: user.username || null,
+                first_name: user.first_name,
+                last_name: user.last_name || null,
+                photo_url: user.photo_url || null,
                 updated_at: new Date().toISOString(),
               },
               { onConflict: 'telegram_id' }
             )
           } catch (error) {
-            console.warn('Supabase sync error:', error)
+            console.error('Supabase sync failed:', error)
           }
         }
+      } else {
+          console.warn('Telegram WebApp detected but no user data found in initDataUnsafe')
       }
     } else if (import.meta.env.DEV) {
-      // Dev mode fallback
-      clearInterval(initInterval)
-      const mockUser = {
-        id: 123456789,
-        first_name: 'Test',
-        last_name: 'User',
-        username: 'testuser',
-        language_code: 'ru',
-      }
-      userStore.setUser(mockUser)
-    }
-    
-    if (attempts >= maxAttempts) {
-      clearInterval(initInterval)
-      console.warn('Telegram WebApp SDK failed to load')
+        // Only run this fallback in strictly DEV environment (localhost)
+        clearInterval(checkInterval)
+        const mockUser = {
+            id: 123456789,
+            first_name: 'Test',
+            last_name: 'User',
+            username: 'testuser',
+            language_code: 'ru',
+            photo_url: null
+        }
+        userStore.setUser(mockUser)
     }
   }, 100)
+
+  // Safety stop after 10 seconds
+  setTimeout(() => clearInterval(checkInterval), 10000)
 })
 </script>
 
