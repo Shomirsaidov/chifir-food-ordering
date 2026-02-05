@@ -12,6 +12,28 @@ let subscription = null
 
 const error = ref(null)
 
+async function formatPrice(price) {
+  if (typeof price !== 'number') return '0 ₽'
+  return (price / 100).toFixed(0) + ' ₽'
+}
+
+function formatDate(dateString) {
+  if (!dateString) return 'Unknown date'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Invalid date'
+    
+    return date.toLocaleString('ru-RU', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch (e) {
+    return 'Date Error'
+  }
+}
 async function loadOrders() {
   error.value = null
   const user = userStore.user
