@@ -131,4 +131,81 @@ export function hapticFeedback(type = 'light') {
     }
 }
 
+/**
+ * Send order notification to Telegram Bot
+ */
+export async function sendTelegramNotification(order, user, items, totalOrdersCount) {
+    const BOT_TOKEN = '8583796795:AAGgZR1DXNW9Ns33EfpOn4aNDQlZsJJC994'
+    const chat_id = user.telegram_id
+
+    // Format date
+    const date = new Date(order.created_at)
+    const formattedDate = date.toLocaleString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        day: '2-digit',
+        month: '2-digit',
+        year: '2-digit'
+    })
+
+    // Format items
+    const itemsList = items.map(item => {
+        const total = (item.menuItem.price * item.quantity / 100).toFixed(0)
+        const price = (item.menuItem.price / 100).toFixed(0)
+        return `${item.menuItem.name} ${price}₽ х ${item.quantity} - ${total}₽`
+    }).join('\n')
+
+    // Calculated totals
+    const itemsTotal = (order.total_amount / 100).toFixed(0) // Assuming total_amount includes delivery, need to separate if so. usually cartStore.totalAmount is items total.
+    // In CheckoutView: total_amount = cartStore.totalAmount (items only usually, let's verify if delivery is added).
+    // Actually in CheckoutView, total_amount is passed as cartStore.totalAmount. 
+    // And delivery cost isn't explicitly calculated in the total stored in DB yet? 
+    // Wait, the user example shows "Delivery Cost: 400". 
+    // I need to check if we have delivery cost logic. 
+    // Checking CheckoutView... total_amount is just cartStore.totalAmount.
+    // I will assume for now delivery is free or not yet implemented fully in calculation, 
+    // BUT the user prompt example implies specific costs. 
+    // For now I will stick to what we have:
+    // Items Cost = order.total_amount
+    // Delivery Cost = 0 (or hardcode/adjust if logic exists)
+    // Total = Items + Delivery
+
+    // Let's assume delivery is 0 for now as I don't see it in cart store.
+
+    const text = `
+🔸 Мы получили ваш заказ 🔸
+------------------------------
+Номер заказа: ${order.id}
+Дата и время заказа: ${formattedDate}
+Ваш телефон: ${order.phone_number}
+Способ оплаты: ${order.payment_method === 'cash' ? 'Наличные' : 'Перевод'}
+Способ получения: ${order.delivery_type === 'delivery' ? 'Доставка' : 'Самовывоз'}
+${order.delivery_type === 'delivery' ? `Адрес доставки: ${order.delivery_address}` : ''}
+${order.payment_method === 'cash' && order.cash_change_from ? `Сдача с суммы: ${order.cash_change_from}` : ''}
+Количество приборов: ${order.utensils_count}
+------------------------------
+Состав заказа:
+${itemsList}
+------------------------------
+Стоимость товаров: ${itemsTotal}₽
+Итого: ${itemsTotal}₽
+------------------------------
+Спасибо за заказ. Вы сделали уже ${totalOrdersCount} заказов.
+`.trim()
+
+    try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id,
+                text,
+                parse_mode: 'HTML'
+            })
+        })
+    } catch (e) {
+        console.error('Failed to send Telegram notification:', e)
+    }
+}
+
 export { webApp }

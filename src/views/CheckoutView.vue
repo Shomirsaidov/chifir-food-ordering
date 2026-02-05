@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { useUserStore } from '../stores/user'
 import { supabase } from '../lib/supabase'
-import { hapticFeedback } from '../lib/telegram'
+import { hapticFeedback, sendTelegramNotification } from '../lib/telegram'
 import LocationPicker from '../components/LocationPicker.vue'
 
 const router = useRouter()
@@ -131,6 +131,27 @@ async function submitOrder() {
       .insert(orderItems)
 
     if (itemsError) throw itemsError
+
+    // Get user's total order count
+    const { count } = await supabase
+        .from('orders')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userData.id)
+
+    // Send Telegram Notification
+    // We need to pass the raw items from cartStore because table items are mapped differently
+    // Actually the function takes (order, user, items, count)
+    // Items in cartStore format: { menuItem: { ... }, quantity: ... }
+    
+    const { sendTelegramNotification } = await import('../lib/telegram') // explicit import to avoid circular dep issues if any, or just use top level
+    
+    // We can just use the import at top, let me add it to top imports
+    await sendTelegramNotification(
+        order,
+        userData, // containing telegram_id
+        cartStore.items,
+        count || 1
+    )
 
     // Success
     hapticFeedback('success')
