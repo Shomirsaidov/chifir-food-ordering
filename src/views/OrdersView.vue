@@ -100,7 +100,39 @@ function setupRealtimeSubscription() {
   }
 }
 
-// ... helper functions ...
+function getStatusColor(status) {
+  switch (status) {
+    case 'new':
+      return '#4a90e2'
+    case 'in_progress':
+      return '#ff9800'
+    case 'ready':
+      return '#4caf50'
+    default:
+      return '#a8b4c4'
+  }
+}
+
+function getStatusText(status) {
+  switch (status) {
+    case 'new':
+      return 'Новый'
+    case 'in_progress':
+      return 'В работе'
+    case 'ready':
+      return 'Готов'
+    default:
+      return status
+  }
+}
+
+function toggleExpand(orderId) {
+  if (expandedOrders.value.has(orderId)) {
+    expandedOrders.value.delete(orderId)
+  } else {
+    expandedOrders.value.add(orderId)
+  }
+}
 
 onMounted(() => {
     // Initial check
