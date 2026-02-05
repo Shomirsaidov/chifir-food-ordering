@@ -42,17 +42,6 @@
         
         <p class="product-description">{{ product.description }}</p>
 
-        <!-- Properties Section -->
-        <div class="properties-section">
-           <div class="property-row">
-              <span class="label">Вес</span>
-              <span class="value">250 г</span>
-           </div>
-           <div class="property-row">
-              <span class="label">Ккал</span>
-              <span class="value">320</span>
-           </div>
-        </div>
       </div>
     </div>
 
@@ -264,34 +253,6 @@ function formatPrice(price) {
   color: var(--color-text-secondary);
   line-height: 1.6;
   margin-bottom: 24px;
-}
-
-.properties-section {
-    display: flex;
-    gap: 20px;
-    padding: 16px;
-    background: var(--color-secondary);
-    border-radius: var(--radius-lg);
-}
-
-.property-row {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-}
-
-.property-row .label {
-    font-size: 0.75rem;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.property-row .value {
-    font-weight: 600;
-    color: var(--color-text);
 }
 
 /* Loading */
