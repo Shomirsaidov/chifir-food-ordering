@@ -12,19 +12,32 @@ const menuItems = ref([])
 const selectedCategory = ref(null)
 const loading = ref(true)
 const searchQuery = ref('')
+const isSearchOpen = ref(false) // New state for search toggle
+
+const categoryEmojis = {
+  'Суши и роллы': '🍣',
+  'Маки': '🍱',
+  'Запечённые роллы': '🔥',
+  'Супы': '🍜',
+  'Салаты': '🥗',
+  'Пицца': '🍕',
+  'default': '🍽️'
+}
+
+function getCategoryEmoji(name) {
+  return categoryEmojis[name] || categoryEmojis['default']
+}
 
 const filteredItems = computed(() => {
   let items = menuItems.value
 
-  // Filter by category
-  if (selectedCategory.value) {
-    items = items.filter((item) => item.category_id === selectedCategory.value)
-  }
-
-  // Filter by search query
+  // Filter by category (only if not searching, or if we want to filter within category)
+  // UX Decision: If searching, usually search all categories.
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
     items = items.filter((item) => item.name.toLowerCase().includes(query))
+  } else if (selectedCategory.value) {
+    items = items.filter((item) => item.category_id === selectedCategory.value)
   }
 
   return items
@@ -89,6 +102,9 @@ async function loadData() {
 function selectCategory(categoryId) {
   hapticFeedback('light')
   selectedCategory.value = categoryId
+  // Clear search when changing category to avoid confusion
+  searchQuery.value = ''
+  isSearchOpen.value = false
 }
 
 function addToCart(item) {
@@ -98,8 +114,22 @@ function addToCart(item) {
 
 
 function getCategoryName(id) {
+  if (searchQuery.value) return `Поиск: "${searchQuery.value}"`
   const cat = categories.value.find(c => c.id === id)
-  return cat ? cat.name : 'All Items'
+  return cat ? cat.name : 'Все меню'
+}
+
+function toggleSearch() {
+  isSearchOpen.value = !isSearchOpen.value
+  if (!isSearchOpen.value) {
+    searchQuery.value = ''
+  } else {
+    // Focus logic would go here typically with a ref
+    setTimeout(() => {
+        const input = document.getElementById('search-input')
+        if (input) input.focus()
+    }, 100)
+  }
 }
 
 onMounted(() => {
@@ -117,31 +147,42 @@ onMounted(() => {
           <span class="logo-text">Chifir</span>
         </div>
         <div class="actions">
-          <button class="icon-btn search-btn">
-             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          <button class="icon-btn search-btn" @click="toggleSearch" :class="{ 'active': isSearchOpen }">
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </button>
           <router-link to="/profile" class="icon-btn profile-btn">
-             <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           </router-link>
         </div>
+      </div>
+      
+      <!-- Search Overlay/Bar -->
+      <div v-if="isSearchOpen" class="search-bar-container container">
+        <input 
+            id="search-input"
+            v-model="searchQuery" 
+            type="text" 
+            placeholder="Поиск блюд..." 
+            class="search-input"
+        >
       </div>
     </div>
 
     <div class="content-wrapper">
       <!-- Promotions / Banners -->
-      <section class="banners-section">
+      <section v-if="!searchQuery" class="banners-section">
          <div class="banner-scroll">
             <div class="banner-card gradient-1">
                <div class="banner-text">
-                  <h3>Free Delivery</h3>
-                  <p>On orders over 1500₽</p>
+                  <h3>Бесплатная доставка</h3>
+                  <p>От 1500₽</p>
                </div>
                <div class="banner-img">🛵</div>
             </div>
             <div class="banner-card gradient-2">
                <div class="banner-text">
-                  <h3>New: Spicy Burger</h3>
-                  <p>Try it now! 🔥</p>
+                  <h3>Новинка: Острый Бургер</h3>
+                  <p>Попробуйте! 🔥</p>
                </div>
                <div class="banner-img">🍔</div>
             </div>
@@ -149,7 +190,7 @@ onMounted(() => {
       </section>
 
       <!-- Categories Sticky -->
-      <div class="categories-wrapper">
+      <div v-if="!searchQuery" class="categories-wrapper">
         <div class="categories">
           <button
             v-for="category in categories"
@@ -158,6 +199,7 @@ onMounted(() => {
             :class="{ active: selectedCategory === category.id }"
             @click="selectCategory(category.id)"
           >
+            <span class="category-emoji">{{ getCategoryEmoji(category.name) }}</span>
             {{ category.name }}
           </button>
         </div>
@@ -202,18 +244,38 @@ onMounted(() => {
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
   z-index: 50;
-  background: rgba(15, 23, 42, 0.85); /* Slate 900 opacity */
+  background: rgba(15, 23, 42, 0.95); /* Slate 900 slightly more opaque */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.3s ease;
 }
 
 .header-content {
-  height: 100%;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.search-bar-container {
+  padding: 0 0 16px 0;
+  animation: slideDown 0.2s ease;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--color-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  color: white;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
 .logo {
@@ -240,6 +302,11 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   transition: all var(--transition-base);
+}
+
+.icon-btn.active {
+  background: var(--color-accent);
+  color: white;
 }
 
 .icon-btn:hover {
@@ -340,6 +407,13 @@ onMounted(() => {
   font-weight: 600;
   border: 1px solid transparent;
   transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-emoji {
+  font-size: 1.1em;
 }
 
 .category-pill.active {

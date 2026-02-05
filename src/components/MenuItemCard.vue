@@ -31,11 +31,6 @@ function formatPrice(price) {
         :alt="item.name"
         class="product-image"
       />
-      <!-- Mock Badges for Visual Flair -->
-      <div class="badges">
-        <span v-if="Math.random() > 0.7" class="badge badge-new">New</span>
-        <span v-if="Math.random() > 0.8" class="badge badge-sale">-10%</span>
-      </div>
     </div>
 
     <div class="content">
