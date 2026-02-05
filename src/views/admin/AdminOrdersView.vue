@@ -81,15 +81,14 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
 import { supabase } from '../../lib/supabase'
-import type { OrderWithItems } from '../../types/database'
 
-const orders = ref<OrderWithItems[]>([])
+const orders = ref([])
 const loading = ref(true)
 
-const statusOptions = ['new', 'ready'] as const
+const statusOptions = ['new', 'ready']
 
 onMounted(() => {
   loadOrders()
@@ -122,13 +121,13 @@ async function loadOrders() {
     .order('created_at', { ascending: false })
 
   if (data) {
-    orders.value = data as any
+    orders.value = data
   }
   
   loading.value = false
 }
 
-async function updateStatus(orderId: string, status: string) {
+async function updateStatus(orderId, status) {
   await supabase
     .from('orders')
     .update({ status })
@@ -136,17 +135,17 @@ async function updateStatus(orderId: string, status: string) {
     
   // Optimistic update
   const order = orders.value.find(o => o.id === orderId)
-  if (order) order.status = status as any
+  if (order) order.status = status
   
   // Refresh to be sure
   loadOrders()
 }
 
-function formatDate(dateStr: string) {
+function formatDate(dateStr) {
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
 
-function formatPrice(price: number) {
+function formatPrice(price) {
   return `${(price / 100).toFixed(0)} ₽`
 }
 </script>

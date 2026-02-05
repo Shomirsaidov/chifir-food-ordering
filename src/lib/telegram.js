@@ -1,13 +1,5 @@
-export interface TelegramUser {
-    id: number
-    first_name: string
-    last_name?: string
-    username?: string
-    language_code?: string
-    photo_url?: string
-}
 
-let webApp: any = null
+let webApp = null
 
 /**
  * Initialize Telegram WebApp SDK
@@ -17,12 +9,12 @@ export function initTelegram() {
 
     try {
         // Check if we're in Telegram environment
-        if (!(window as any).Telegram?.WebApp) {
+        if (!window.Telegram?.WebApp) {
             console.warn('Not running in Telegram WebApp environment')
             return null
         }
 
-        webApp = (window as any).Telegram.WebApp
+        webApp = window.Telegram.WebApp
         webApp.ready()
         webApp.expand()
 
@@ -42,7 +34,7 @@ export function initTelegram() {
  * Note: This should only be used for display purposes
  * Always validate initData on the server side
  */
-export function getTelegramUser(): TelegramUser | null {
+export function getTelegramUser() {
     if (!webApp) {
         // Return mock user for development outside Telegram
         if (import.meta.env.DEV) {
@@ -78,7 +70,7 @@ export function getTelegramUser(): TelegramUser | null {
 /**
  * Get raw initData string for server-side validation
  */
-export function getInitData(): string {
+export function getInitData() {
     if (!webApp) return ''
     return webApp.initData || ''
 }
@@ -86,7 +78,7 @@ export function getInitData(): string {
 /**
  * Show Telegram main button
  */
-export function showMainButton(text: string, onClick: () => void) {
+export function showMainButton(text, onClick) {
     if (!webApp) return
 
     webApp.MainButton.setText(text)
@@ -105,7 +97,7 @@ export function hideMainButton() {
 /**
  * Show Telegram back button
  */
-export function showBackButton(onClick: () => void) {
+export function showBackButton(onClick) {
     if (!webApp) return
     webApp.BackButton.show()
     webApp.BackButton.onClick(onClick)
@@ -122,7 +114,7 @@ export function hideBackButton() {
 /**
  * Haptic feedback
  */
-export function hapticFeedback(type: 'light' | 'medium' | 'heavy' | 'success' | 'warning' | 'error' = 'light') {
+export function hapticFeedback(type = 'light') {
     if (!webApp) return
 
     switch (type) {

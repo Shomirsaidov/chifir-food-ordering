@@ -66,18 +66,17 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { supabase } from '../lib/supabase'
 import { useCartStore } from '../stores/cart'
-import type { MenuItem } from '../types/database'
 import ProductImage from '../components/ProductImage.vue'
 
 const route = useRoute()
 const cartStore = useCartStore()
 
-const product = ref<MenuItem | null>(null)
+const product = ref(null)
 const loading = ref(true)
 const showProperties = ref(false)
 
@@ -94,7 +93,7 @@ onMounted(async () => {
 
 async function loadProduct() {
   loading.value = true
-  const productId = route.params.id as string
+  const productId = route.params.id
 
   const { data } = await supabase
     .from('menu_items')
@@ -122,7 +121,7 @@ function decreaseCartQuantity() {
   }
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price) {
   return `${(price / 100).toFixed(0)} ₽` // Changed to 0 decimals for consistency
 }
 </script>

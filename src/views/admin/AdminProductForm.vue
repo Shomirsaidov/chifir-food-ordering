@@ -56,16 +56,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
-import type { MenuItem } from '../../types/database'
 import { supabase } from '../../lib/supabase'
 
-const props = defineProps<{
-  item?: MenuItem
-  categories: any[]
-}>()
-
+const props = defineProps(['item', 'categories'])
 const emit = defineEmits(['close', 'saved'])
 
 const isEdit = !!props.item
@@ -83,7 +78,7 @@ const form = ref({
 // Computed property to handle Ruble <-> Tiyin conversion
 const displayPrice = computed({
   get: () => Math.round(form.value.price / 100),
-  set: (val: number) => {
+  set: (val) => {
     form.value.price = val * 100
   }
 })

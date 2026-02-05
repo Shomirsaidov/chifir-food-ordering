@@ -1,14 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 import { supabase } from '../lib/supabase'
 import { getTelegramUser } from '../lib/telegram'
-import type { OrderWithItems } from '../types/database'
 
-const orders = ref<OrderWithItems[]>([])
+const orders = ref([])
 const loading = ref(true)
-const expandedOrders = ref<Set<string>>(new Set())
+const expandedOrders = ref(new Set())
 
-let subscription: any = null
+let subscription = null
 
 async function loadOrders() {
   const user = getTelegramUser()
@@ -34,7 +33,7 @@ async function loadOrders() {
     .order('created_at', { ascending: false })
 
   if (ordersData) {
-    orders.value = ordersData.map((order: any) => ({
+    orders.value = ordersData.map((order) => ({
       ...order,
       items: order.order_items,
     }))
@@ -63,7 +62,7 @@ function setupRealtimeSubscription() {
     .subscribe()
 }
 
-function toggleExpand(orderId: string) {
+function toggleExpand(orderId) {
   if (expandedOrders.value.has(orderId)) {
     expandedOrders.value.delete(orderId)
   } else {
@@ -71,7 +70,7 @@ function toggleExpand(orderId: string) {
   }
 }
 
-function getStatusColor(status: string) {
+function getStatusColor(status) {
   switch (status) {
     case 'new':
       return '#4a90e2'
@@ -84,7 +83,7 @@ function getStatusColor(status: string) {
   }
 }
 
-function getStatusText(status: string) {
+function getStatusText(status) {
   switch (status) {
     case 'new':
       return 'Новый'
@@ -97,11 +96,11 @@ function getStatusText(status: string) {
   }
 }
 
-function formatPrice(price: number) {
+function formatPrice(price) {
   return (price / 100).toFixed(0) + ' ₽'
 }
 
-function formatDate(dateString: string) {
+function formatDate(dateString) {
   const date = new Date(dateString)
   return date.toLocaleString('ru-RU', {
     day: '2-digit',

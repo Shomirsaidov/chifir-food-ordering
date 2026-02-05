@@ -7,7 +7,7 @@
  * @param imageLoc - The image location string
  * @returns true if external URL, false if internal
  */
-export function isExternalImage(imageLoc: string | null | undefined): boolean {
+export function isExternalImage(imageLoc) {
     if (!imageLoc) return false
     return imageLoc.startsWith('http://') || imageLoc.startsWith('https://')
 }
@@ -17,7 +17,7 @@ export function isExternalImage(imageLoc: string | null | undefined): boolean {
  * @param imageLoc - The image location from database (URL or filename)
  * @returns Full URL or import path for the image
  */
-export function getImageUrl(imageLoc: string | null | undefined): string | null {
+export function getImageUrl(imageLoc) {
     if (!imageLoc) return null
 
     // External URL - return as is
@@ -40,7 +40,7 @@ export function getImageUrl(imageLoc: string | null | undefined): string | null 
  * @param imageLoc - The image location
  * @returns Promise that resolves to true if image loads successfully
  */
-export async function validateImage(imageLoc: string | null | undefined): Promise<boolean> {
+export async function validateImage(imageLoc) {
     const url = getImageUrl(imageLoc)
     if (!url) return false
 

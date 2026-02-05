@@ -1,16 +1,15 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '../lib/supabase'
 import { useCartStore } from '../stores/cart'
 import { hapticFeedback } from '../lib/telegram'
-import type { Category, MenuItem } from '../types/database'
 import MenuItemCard from '../components/MenuItemCard.vue'
 
 const cartStore = useCartStore()
 
-const categories = ref<Category[]>([])
-const menuItems = ref<MenuItem[]>([])
-const selectedCategory = ref<string | null>(null)
+const categories = ref([])
+const menuItems = ref([])
+const selectedCategory = ref(null)
 const loading = ref(true)
 const searchQuery = ref('')
 
@@ -43,7 +42,7 @@ async function loadData() {
   if (categoriesData && categoriesData.length > 0) {
     categories.value = categoriesData
     if (categoriesData.length > 0) {
-      selectedCategory.value = categoriesData[0]!.id
+      selectedCategory.value = categoriesData[0].id
     }
   } else {
     // Use mock data for development
@@ -56,7 +55,7 @@ async function loadData() {
       { id: '6', name: 'Пицца', sort_order: 6, created_at: new Date().toISOString() },
     ]
     categories.value = mockCategories
-    selectedCategory.value = mockCategories[0]!.id
+    selectedCategory.value = mockCategories[0].id
   }
 
   // Load menu items
@@ -87,12 +86,12 @@ async function loadData() {
   loading.value = false
 }
 
-function selectCategory(categoryId: string) {
+function selectCategory(categoryId) {
   hapticFeedback('light')
   selectedCategory.value = categoryId
 }
 
-function addToCart(item: MenuItem) {
+function addToCart(item) {
   hapticFeedback('success')
   cartStore.addItem(item, 1)
 }

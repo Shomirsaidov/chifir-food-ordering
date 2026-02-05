@@ -1,24 +1,23 @@
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
 import { supabase } from '../lib/supabase'
 import { getTelegramUser, hapticFeedback } from '../lib/telegram'
 import LocationPicker from '../components/LocationPicker.vue'
-import type { Order } from '../types/database'
 
 const router = useRouter()
 const cartStore = useCartStore()
 
 // State
-const deliveryType = ref<'delivery' | 'pickup'>('delivery')
+const deliveryType = ref('delivery')
 const address = ref('')
 const phoneNumber = ref('')
-const paymentMethod = ref<'cash' | 'transfer'>('transfer')
+const paymentMethod = ref('transfer')
 const utensilsCount = ref(1)
 const cashChangeFrom = ref('')
 const comment = ref('')
-const coordinates = ref<{ lat: number; lng: number } | null>(null)
+const coordinates = ref(null)
 const loading = ref(false)
 const error = ref('')
 
@@ -27,14 +26,12 @@ const formattedTotal = computed(() => {
   return (cartStore.totalAmount / 100).toFixed(0) + ' \u20BD' // Ruble sign
 })
 
-function formatPrice(price: number) {
+function formatPrice(price) {
   return (price / 100).toFixed(0) + ' \u20BD'
 }
 
-function updateLocation(loc: { lat: number; lng: number }) {
+function updateLocation(loc) {
   coordinates.value = loc
-  // Optional: Reverse geocoding could go here to auto-fill address
-  // For now, we trust the marker placement + manual address detail
 }
 
 async function submitOrder() {
@@ -94,7 +91,7 @@ async function submitOrder() {
     if (!userData) throw new Error('Не удалось подтвердить пользователя')
 
     // Create Order
-    const orderData: Partial<Order> = {
+    const orderData = {
       user_id: userData.id,
       delivery_type: deliveryType.value,
       phone_number: phoneNumber.value.trim(),
@@ -138,7 +135,7 @@ async function submitOrder() {
     cartStore.clearCart()
     router.push('/orders')
 
-  } catch (err: any) {
+  } catch (err) {
     console.error('Order error:', err)
     error.value = err.message || 'Ошибка при оформлении заказа'
     hapticFeedback('error')

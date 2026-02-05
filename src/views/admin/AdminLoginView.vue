@@ -28,7 +28,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -36,7 +36,7 @@ const router = useRouter()
 const pin = ref('')
 const error = ref('')
 const loading = ref(false)
-const pinInput = ref<HTMLInputElement | null>(null)
+const pinInput = ref(null)
 
 // Simple hardcoded PIN for now (as requested in plan)
 const ADMIN_PIN = '1234'

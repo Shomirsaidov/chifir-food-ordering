@@ -1,15 +1,12 @@
-<script setup lang="ts">
+<script setup>
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
-import type { MenuItem } from '../types/database'
 import ProductImage from './ProductImage.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 
-const props = defineProps<{
-  item: MenuItem
-}>()
+const props = defineProps(['item'])
 
 function goToProduct() {
   router.push(`/product/${props.item.id}`)
@@ -20,7 +17,7 @@ function addToCart() {
   // user feedback could be added here (haptic or toast)
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price) {
   return `${(price / 100).toFixed(0)} ₽`
 }
 </script>

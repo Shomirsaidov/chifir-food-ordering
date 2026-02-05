@@ -1,9 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { CartItem, MenuItem } from '../types/database'
 
 export const useCartStore = defineStore('cart', () => {
-    const items = ref<CartItem[]>([])
+    const items = ref([])
 
     // Load cart from localStorage on init
     const savedCart = localStorage.getItem('cart')
@@ -27,7 +26,7 @@ export const useCartStore = defineStore('cart', () => {
     const isEmpty = computed(() => items.value.length === 0)
 
     // Actions
-    function addItem(menuItem: MenuItem, quantity: number = 1) {
+    function addItem(menuItem, quantity = 1) {
         const existingItem = items.value.find((item) => item.menuItem.id === menuItem.id)
 
         if (existingItem) {
@@ -39,12 +38,12 @@ export const useCartStore = defineStore('cart', () => {
         saveToLocalStorage()
     }
 
-    function removeItem(menuItemId: string) {
+    function removeItem(menuItemId) {
         items.value = items.value.filter((item) => item.menuItem.id !== menuItemId)
         saveToLocalStorage()
     }
 
-    function updateQuantity(menuItemId: string, quantity: number) {
+    function updateQuantity(menuItemId, quantity) {
         const item = items.value.find((item) => item.menuItem.id === menuItemId)
         if (item) {
             if (quantity <= 0) {

@@ -49,19 +49,18 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted } from 'vue'
 import { supabase } from '../../lib/supabase'
-import type { MenuItem } from '../../types/database'
 import AdminProductForm from './AdminProductForm.vue'
 
-const categories = ref<any[]>([])
-const menuItems = ref<MenuItem[]>([])
+const categories = ref([])
+const menuItems = ref([])
 const selectedCategory = ref('')
 const loading = ref(true)
 
 const showForm = ref(false)
-const editingItem = ref<MenuItem | undefined>(undefined)
+const editingItem = ref(undefined)
 
 const filteredItems = computed(() => {
   return menuItems.value.filter(item => item.category_id === selectedCategory.value)
@@ -105,12 +104,12 @@ function openNewItem() {
   showForm.value = true
 }
 
-function editItem(item: MenuItem) {
+function editItem(item) {
   editingItem.value = item
   showForm.value = true
 }
 
-async function deleteItem(item: MenuItem) {
+async function deleteItem(item) {
   if (!confirm(`Delete "${item.name}"?`)) return
   
   const { error } = await supabase
