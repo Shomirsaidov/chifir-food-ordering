@@ -12,7 +12,7 @@ let subscription = null
 
 const error = ref(null)
 
-async function formatPrice(price) {
+function formatPrice(price) {
   if (typeof price !== 'number') return '0 ₽'
   return (price / 100).toFixed(0) + ' ₽'
 }
