@@ -1,20 +1,20 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
-import { getTelegramUser } from '../lib/telegram'
 import { supabase } from '../lib/supabase'
+import { useUserStore } from '../stores/user'
 
 const router = useRouter()
-const user = ref(getTelegramUser())
+const userStore = useUserStore()
 const isAdmin = ref(false)
 
 async function checkAdminStatus() {
-  if (!user.value || !user.value.username) return
+  if (!userStore.user || !userStore.user.username) return
 
   const { data } = await supabase
     .from('admins')
     .select('*')
-    .eq('telegram_username', user.value.username)
+    .eq('telegram_username', userStore.user.username)
     .single()
 
   isAdmin.value = !!data
@@ -28,8 +28,11 @@ function goToAdminPanel() {
   router.push('/admin/orders')
 }
 
-onMounted(() => {
-  checkAdminStatus()
+// Watch for user changes (in case it loads late)
+watchEffect(() => {
+    if (userStore.user) {
+        checkAdminStatus()
+    }
 })
 </script>
 
@@ -37,20 +40,20 @@ onMounted(() => {
   <div class="profile-view">
     <h1>Профиль</h1>
 
-    <div v-if="user" class="profile-card card">
-      <div v-if="user.photo_url" class="profile-photo">
-        <img :src="user.photo_url" :alt="user.first_name" />
+    <div v-if="userStore.user" class="profile-card card">
+      <div v-if="userStore.user.photo_url" class="profile-photo">
+        <img :src="userStore.user.photo_url" :alt="userStore.user.first_name" />
       </div>
       <div v-else class="profile-photo-placeholder">
-        {{ user.first_name.charAt(0) }}
+        {{ userStore.user.first_name.charAt(0) }}
       </div>
 
       <div class="profile-info">
         <h2 class="profile-name">
-          {{ user.first_name }} {{ user.last_name || '' }}
+          {{ userStore.user.first_name }} {{ userStore.user.last_name || '' }}
         </h2>
-        <p v-if="user.username" class="profile-username">@{{ user.username }}</p>
-        <p class="profile-id">ID: {{ user.id }}</p>
+        <p v-if="userStore.user.username" class="profile-username">@{{ userStore.user.username }}</p>
+        <p class="profile-id">ID: {{ userStore.user.id }}</p>
       </div>
     </div>
 

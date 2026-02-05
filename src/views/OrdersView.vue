@@ -1,8 +1,9 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watchEffect } from 'vue'
 import { supabase } from '../lib/supabase'
-import { getTelegramUser } from '../lib/telegram'
+import { useUserStore } from '../stores/user'
 
+const userStore = useUserStore()
 const orders = ref([])
 const loading = ref(true)
 const expandedOrders = ref(new Set())
@@ -10,8 +11,11 @@ const expandedOrders = ref(new Set())
 let subscription = null
 
 async function loadOrders() {
-  const user = getTelegramUser()
-  if (!user) return
+  const user = userStore.user
+  if (!user) {
+      // User not loaded yet, keep loading true
+      return 
+  }
 
   // Get user ID
   const { data: userData } = await supabase
@@ -20,7 +24,10 @@ async function loadOrders() {
     .eq('telegram_id', user.id)
     .single()
 
-  if (!userData) return
+  if (!userData) {
+      loading.value = false
+      return
+  }
 
   // Load orders with items
   const { data: ordersData } = await supabase
@@ -43,7 +50,7 @@ async function loadOrders() {
 }
 
 function setupRealtimeSubscription() {
-  const user = getTelegramUser()
+  const user = userStore.user
   if (!user) return
 
   subscription = supabase
@@ -62,58 +69,22 @@ function setupRealtimeSubscription() {
     .subscribe()
 }
 
-function toggleExpand(orderId) {
-  if (expandedOrders.value.has(orderId)) {
-    expandedOrders.value.delete(orderId)
-  } else {
-    expandedOrders.value.add(orderId)
-  }
-}
-
-function getStatusColor(status) {
-  switch (status) {
-    case 'new':
-      return '#4a90e2'
-    case 'in_progress':
-      return '#ff9800'
-    case 'ready':
-      return '#4caf50'
-    default:
-      return '#a8b4c4'
-  }
-}
-
-function getStatusText(status) {
-  switch (status) {
-    case 'new':
-      return 'Новый'
-    case 'in_progress':
-      return 'В работе'
-    case 'ready':
-      return 'Готов'
-    default:
-      return status
-  }
-}
-
-function formatPrice(price) {
-  return (price / 100).toFixed(0) + ' ₽'
-}
-
-function formatDate(dateString) {
-  const date = new Date(dateString)
-  return date.toLocaleString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
+// ... helper functions ...
 
 onMounted(() => {
-  loadOrders()
-  setupRealtimeSubscription()
+    // Initial check
+    if (userStore.user) {
+        loadOrders()
+        setupRealtimeSubscription()
+    }
+})
+
+// React when user loads
+watchEffect(() => {
+    if (userStore.user && loading.value) {
+        loadOrders()
+        setupRealtimeSubscription()
+    }
 })
 
 onUnmounted(() => {

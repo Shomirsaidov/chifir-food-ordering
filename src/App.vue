@@ -1,17 +1,39 @@
 <script setup>
 import { onMounted } from 'vue'
 import { RouterView } from 'vue-router'
-import { initTelegram, getTelegramUser } from './lib/telegram'
+import { initTelegram } from './lib/telegram'
 import { supabase } from './lib/supabase'
 import CartButton from './components/CartButton.vue'
+import { useUserStore } from './stores/user'
+
+const userStore = useUserStore()
 
 onMounted(async () => {
   // Initialize Telegram WebApp
-  initTelegram()
+  const webApp = initTelegram()
 
-  // Get Telegram user and create/update in database
-  const telegramUser = getTelegramUser()
+  // FORCE extraction from window.Telegram.WebApp.initDataUnsafe.user as requested
+  let telegramUser = null
+  
+  // Try direct access first (Production/Telegram)
+  if (typeof window !== 'undefined' && window.Telegram?.WebApp?.initDataUnsafe?.user) {
+    telegramUser = window.Telegram.WebApp.initDataUnsafe.user
+  } 
+  // Fallback to previous method or mock for dev
+  else if (import.meta.env.DEV) {
+     telegramUser = {
+        id: 123456789,
+        first_name: 'Test',
+        last_name: 'User',
+        username: 'testuser',
+        language_code: 'ru',
+    }
+  }
+
   if (telegramUser) {
+    // Save to store immediately so other views get it
+    userStore.setUser(telegramUser)
+
     try {
       // Only try to create user if Supabase is configured
       if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
