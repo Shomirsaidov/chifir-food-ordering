@@ -35,7 +35,10 @@ export function initTelegram() {
  * Always validate initData on the server side
  */
 export function getTelegramUser() {
-    if (!webApp) {
+    // Try to get from cached variable OR directly from window
+    const app = webApp || (typeof window !== 'undefined' && window.Telegram?.WebApp)
+
+    if (!app) {
         // Return mock user for development outside Telegram
         if (import.meta.env.DEV) {
             return {
@@ -50,7 +53,7 @@ export function getTelegramUser() {
     }
 
     try {
-        const user = webApp.initDataUnsafe?.user
+        const user = app.initDataUnsafe?.user
         if (!user) return null
 
         return {
