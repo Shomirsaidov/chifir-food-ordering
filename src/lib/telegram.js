@@ -135,7 +135,7 @@ export function hapticFeedback(type = 'light') {
  * Send order notification to Telegram Bot
  */
 export async function sendTelegramNotification(order, user, items, totalOrdersCount) {
-    const BOT_TOKEN = '8583796795:AAGgZR1DXNW9Ns33EfpOn4aNDQlZsJJC994'
+    const BOT_TOKEN = '8431199932:AAGoQyxcX5M7I8lUQiX2jTb_EcWJN6scjRw'
     const chat_id = user.telegram_id
 
     // Format date
