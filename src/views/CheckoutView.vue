@@ -66,7 +66,7 @@ async function submitOrder() {
     let userData
     const { data: existingUser } = await supabase
       .from('users')
-      .select('id')
+      .select('id, telegram_id')
       .eq('telegram_id', telegramId)
       .single()
 
@@ -83,7 +83,7 @@ async function submitOrder() {
             last_name: user?.last_name || null,
             updated_at: new Date().toISOString(),
         })
-        .select('id')
+        .select('id, telegram_id')
         .single()
       
       if (createError) throw new Error('Failed to create user record: ' + createError.message)
