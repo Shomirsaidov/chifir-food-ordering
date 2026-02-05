@@ -42,16 +42,19 @@ async function submitOrder() {
   // Validation
   if (!phoneNumber.value.trim()) {
     error.value = 'Пожалуйста, укажите номер телефона'
+    hapticFeedback('error')
     return
   }
   
   if (deliveryType.value === 'delivery') {
     if (!address.value.trim()) {
       error.value = 'Пожалуйста, укажите адрес доставки'
+      hapticFeedback('error')
       return
     }
     if (!coordinates.value) {
       error.value = 'Пожалуйста, укажите местоположение на карте'
+      hapticFeedback('error')
       return
     }
   }
@@ -60,24 +63,29 @@ async function submitOrder() {
 
   try {
     const user = userStore.user
-    const telegramId = user?.id || 123456789 // Fallback for dev
+    const telegramId = user?.id
+
+    if (!telegramId && !import.meta.env.DEV) {
+        throw new Error('User identification failed')
+    }
 
     // User logic: Upsert user
     let userData
+    const safeTelegramId = telegramId || 123456789
+    
     const { data: existingUser } = await supabase
       .from('users')
       .select('id, telegram_id')
-      .eq('telegram_id', telegramId)
+      .eq('telegram_id', safeTelegramId)
       .single()
 
     if (existingUser) {
       userData = existingUser
     } else {
-      console.log('User not found, creating...')
       const { data: newUser, error: createError } = await supabase
         .from('users')
         .upsert({
-            telegram_id: telegramId,
+            telegram_id: safeTelegramId,
             username: user?.username || null,
             first_name: user?.first_name || 'Guest',
             last_name: user?.last_name || null,
@@ -86,11 +94,9 @@ async function submitOrder() {
         .select('id, telegram_id')
         .single()
       
-      if (createError) throw new Error('Failed to create user record: ' + createError.message)
+      if (createError) throw createError
       userData = newUser
     }
-
-    if (!userData) throw new Error('Не удалось подтвердить пользователя')
 
     // Create Order
     const orderData = {
@@ -103,10 +109,8 @@ async function submitOrder() {
       comment: comment.value.trim() || null,
       total_amount: cartStore.totalAmount,
       status: 'new',
-      // Delivery specific
       delivery_address: deliveryType.value === 'delivery' ? address.value.trim() : null,
       delivery_coordinates: deliveryType.value === 'delivery' ? coordinates.value : null,
-      table_location: null // No longer used
     }
 
     const { data: order, error: orderError } = await supabase
@@ -132,35 +136,26 @@ async function submitOrder() {
 
     if (itemsError) throw itemsError
 
-    // Get user's total order count
+    // Get count for notification
     const { count } = await supabase
         .from('orders')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userData.id)
 
-    // Send Telegram Notification
-    // We need to pass the raw items from cartStore because table items are mapped differently
-    // Actually the function takes (order, user, items, count)
-    // Items in cartStore format: { menuItem: { ... }, quantity: ... }
-    
-    const { sendTelegramNotification } = await import('../lib/telegram') // explicit import to avoid circular dep issues if any, or just use top level
-    
-    // We can just use the import at top, let me add it to top imports
-    await sendTelegramNotification(
-        order,
-        userData, // containing telegram_id
-        cartStore.items,
-        count || 1
-    )
+    // Notify Telegram
+    try {
+        await sendTelegramNotification(order, userData, cartStore.items, count || 1)
+    } catch (e) {
+        console.error('Notification failed but order placed', e)
+    }
 
-    // Success
     hapticFeedback('success')
     cartStore.clearCart()
-    router.push('/orders')
+    router.replace('/orders')
 
   } catch (err) {
     console.error('Order error:', err)
-    error.value = err.message || 'Ошибка при оформлении заказа'
+    error.value = err.message || 'Ошибка сервера'
     hapticFeedback('error')
   } finally {
     loading.value = false
@@ -342,171 +337,6 @@ async function submitOrder() {
     <div style="height: 80px;"></div>
   </div>
 </template>
-
-<script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useCartStore } from '../stores/cart'
-import { useUserStore } from '../stores/user'
-import { supabase } from '../lib/supabase'
-import { hapticFeedback, sendTelegramNotification } from '../lib/telegram'
-import LocationPicker from '../components/LocationPicker.vue'
-
-const router = useRouter()
-const cartStore = useCartStore()
-const userStore = useUserStore()
-
-// State
-const deliveryType = ref('delivery')
-const address = ref('')
-const phoneNumber = ref('')
-const paymentMethod = ref('transfer')
-const utensilsCount = ref(1)
-const cashChangeFrom = ref('')
-const comment = ref('')
-const coordinates = ref(null)
-const loading = ref(false)
-const error = ref('')
-
-// Computed
-const formattedTotal = computed(() => {
-  return (cartStore.totalAmount / 100).toFixed(0) + ' ₽'
-})
-
-function formatPrice(price) {
-  return (price / 100).toFixed(0) + ' ₽'
-}
-
-function updateLocation(loc) {
-  coordinates.value = loc
-}
-
-async function submitOrder() {
-  error.value = ''
-  
-  // Validation
-  if (!phoneNumber.value.trim()) {
-    error.value = 'Пожалуйста, укажите номер телефона'
-    hapticFeedback('error')
-    return
-  }
-  
-  if (deliveryType.value === 'delivery') {
-    if (!address.value.trim()) {
-      error.value = 'Пожалуйста, укажите адрес доставки'
-      hapticFeedback('error')
-      return
-    }
-    if (!coordinates.value) {
-      error.value = 'Пожалуйста, укажите местоположение на карте'
-      hapticFeedback('error')
-      return
-    }
-  }
-
-  loading.value = true
-
-  try {
-    const user = userStore.user
-    const telegramId = user?.id
-
-    if (!telegramId && !import.meta.env.DEV) {
-        throw new Error('User identification failed')
-    }
-
-    // User logic: Upsert user
-    let userData
-    const safeTelegramId = telegramId || 123456789
-    
-    const { data: existingUser } = await supabase
-      .from('users')
-      .select('id, telegram_id')
-      .eq('telegram_id', safeTelegramId)
-      .single()
-
-    if (existingUser) {
-      userData = existingUser
-    } else {
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .upsert({
-            telegram_id: safeTelegramId,
-            username: user?.username || null,
-            first_name: user?.first_name || 'Guest',
-            last_name: user?.last_name || null,
-            updated_at: new Date().toISOString(),
-        })
-        .select('id, telegram_id')
-        .single()
-      
-      if (createError) throw createError
-      userData = newUser
-    }
-
-    // Create Order
-    const orderData = {
-      user_id: userData.id,
-      delivery_type: deliveryType.value,
-      phone_number: phoneNumber.value.trim(),
-      payment_method: paymentMethod.value,
-      utensils_count: utensilsCount.value,
-      cash_change_from: paymentMethod.value === 'cash' ? cashChangeFrom.value : null,
-      comment: comment.value.trim() || null,
-      total_amount: cartStore.totalAmount,
-      status: 'new',
-      delivery_address: deliveryType.value === 'delivery' ? address.value.trim() : null,
-      delivery_coordinates: deliveryType.value === 'delivery' ? coordinates.value : null,
-    }
-
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .insert(orderData)
-      .select()
-      .single()
-
-    if (orderError) throw orderError
-
-    // Create Items
-    const orderItems = cartStore.items.map((item) => ({
-      order_id: order.id,
-      menu_item_id: item.menuItem.id,
-      menu_item_name: item.menuItem.name,
-      quantity: item.quantity,
-      price: item.menuItem.price,
-    }))
-
-    const { error: itemsError } = await supabase
-      .from('order_items')
-      .insert(orderItems)
-
-    if (itemsError) throw itemsError
-
-    // Get count for notification
-    const { count } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userData.id)
-
-    // Notify Telegram
-    try {
-        await sendTelegramNotification(order, userData, cartStore.items, count || 1)
-    } catch (e) {
-        console.error('Notification failed but order placed', e)
-    }
-
-    hapticFeedback('success')
-    cartStore.clearCart()
-    router.replace('/orders')
-
-  } catch (err) {
-    console.error('Order error:', err)
-    error.value = err.message || 'Ошибка сервера'
-    hapticFeedback('error')
-  } finally {
-    loading.value = false
-  }
-}
-</script>
 
 <style scoped>
 .checkout-view {
