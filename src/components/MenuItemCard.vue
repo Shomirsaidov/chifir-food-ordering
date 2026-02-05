@@ -24,133 +24,174 @@ function formatPrice(price) {
 
 <template>
   <div class="menu-item-card" @click="goToProduct">
-    <div class="item-image-container">
+    <div class="image-container">
       <ProductImage
         :image-loc="item.image_loc"
         :image-url="item.image_url"
         :alt="item.name"
-        placeholder="🍱"
+        class="product-image"
       />
+      <!-- Mock Badges for Visual Flair -->
+      <div class="badges">
+        <span v-if="Math.random() > 0.7" class="badge badge-new">New</span>
+        <span v-if="Math.random() > 0.8" class="badge badge-sale">-10%</span>
+      </div>
     </div>
 
-    <div class="item-content">
-      <h3 class="item-name">{{ item.name }}</h3>
-      <p v-if="item.description" class="item-description">
-        {{ item.description }}
-      </p>
-      <div class="item-footer">
-        <span class="item-price">{{ formatPrice(item.price) }}</span>
-        <button class="add-btn" @click.stop="addToCart">+</button>
+    <div class="content">
+      <div class="header">
+        <h3 class="title">{{ item.name }}</h3>
+        <p class="description">{{ item.description }}</p>
+      </div>
+
+      <div class="footer">
+        <div class="price-tag">
+          <span class="price">{{ formatPrice(item.price) }}</span>
+          <span v-if="Math.random() > 0.8" class="old-price">{{ formatPrice(item.price * 1.1) }}</span>
+        </div>
+        <button class="add-btn" @click.stop="addToCart">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-
 .menu-item-card {
-  background: var(--color-surface);
-  border-radius: 16px;
+  background: var(--color-secondary);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.2s ease;
-  cursor: pointer;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  height: 100%;
 }
 
 .menu-item-card:active {
   transform: scale(0.98);
 }
 
-.item-image-container {
+.image-container {
+  position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  aspect-ratio: 4/3;
   overflow: hidden;
   background: var(--color-primary);
 }
 
-.item-image {
+.product-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform var(--transition-slow);
 }
 
-.item-image-placeholder {
-  width: 100%;
-  height: 100%;
+.menu-item-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.badges {
+  position: absolute;
+  top: 10px;
+  left: 10px;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  background: var(--color-primary);
+  gap: 6px;
+  z-index: 2;
 }
 
-.item-content {
-  padding: var(--spacing-md);
+.badge {
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+
+.badge-new {
+  background: rgba(16, 185, 129, 0.9); /* Emerald */
+}
+
+.badge-sale {
+  background: rgba(245, 158, 11, 0.9); /* Amber */
+}
+
+.content {
+  padding: 14px;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
-  flex: 1;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.item-name {
+.title {
   font-size: 1rem;
-  font-weight: 600;
-  margin: 0;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 4px;
   line-height: 1.3;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
-.item-description {
-  font-size: 0.75rem;
+.description {
+  font-size: 0.8rem;
   color: var(--color-text-secondary);
-  margin: 0;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  opacity: 0.8;
 }
 
-.item-footer {
+.footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  padding-top: var(--spacing-sm);
 }
 
-.item-price {
+.price-tag {
+  display: flex;
+  flex-direction: column;
+}
+
+.price {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-accent);
+  color: var(--color-text);
+}
+
+.old-price {
+  font-size: 0.75rem;
+  text-decoration: line-through;
+  color: var(--color-text-secondary);
+  opacity: 0.6;
 }
 
 .add-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: white;
-  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s;
-  padding-bottom: 2px;
+  transition: all var(--transition-base);
 }
 
 .add-btn:hover {
-  background: #3a7bc8;
-  transform: scale(1.1);
+  background: var(--color-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .add-btn:active {
-  transform: scale(0.9);
+  transform: translateY(0);
 }
 </style>
