@@ -2,12 +2,14 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '../stores/cart'
+import { useUserStore } from '../stores/user'
 import { supabase } from '../lib/supabase'
-import { getTelegramUser, hapticFeedback } from '../lib/telegram'
+import { hapticFeedback } from '../lib/telegram'
 import LocationPicker from '../components/LocationPicker.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const userStore = useUserStore()
 
 // State
 const deliveryType = ref('delivery')
@@ -57,7 +59,7 @@ async function submitOrder() {
   loading.value = true
 
   try {
-    const user = getTelegramUser()
+    const user = userStore.user
     const telegramId = user?.id || 123456789 // Fallback for dev
 
     // User logic: Upsert user

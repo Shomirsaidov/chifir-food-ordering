@@ -10,63 +10,72 @@ const expandedOrders = ref(new Set())
 
 let subscription = null
 
+const error = ref(null)
+
 async function loadOrders() {
+  error.value = null
   const user = userStore.user
-  if (!user) {
-      // User not loaded yet, keep loading true
-      return 
-  }
+  if (!user) return 
 
-  // Get user ID
-  const { data: userData } = await supabase
-    .from('users')
-    .select('id')
-    .eq('telegram_id', user.id)
-    .single()
+  try {
+    // Get user ID
+    const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('telegram_id', user.id)
+        .single()
 
-  if (!userData) {
+    if (userError) throw userError
+    if (!userData) throw new Error('User not found in database')
+
+    // Load orders with items
+    const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select(`
+        *,
+        order_items (*)
+        `)
+        .eq('user_id', userData.id)
+        .order('created_at', { ascending: false })
+
+    if (ordersError) throw ordersError
+
+    if (ordersData) {
+        orders.value = ordersData.map((order) => ({
+        ...order,
+        items: order.order_items || [],
+        }))
+    }
+  } catch (e) {
+      console.error('Error loading orders:', e)
+      error.value = e.message
+  } finally {
       loading.value = false
-      return
   }
-
-  // Load orders with items
-  const { data: ordersData } = await supabase
-    .from('orders')
-    .select(`
-      *,
-      order_items (*)
-    `)
-    .eq('user_id', userData.id)
-    .order('created_at', { ascending: false })
-
-  if (ordersData) {
-    orders.value = ordersData.map((order) => ({
-      ...order,
-      items: order.order_items,
-    }))
-  }
-
-  loading.value = false
 }
 
 function setupRealtimeSubscription() {
   const user = userStore.user
   if (!user) return
 
-  subscription = supabase
-    .channel('orders_changes')
-    .on(
-      'postgres_changes',
-      {
-        event: '*',
-        schema: 'public',
-        table: 'orders',
-      },
-      () => {
-        loadOrders()
-      }
-    )
-    .subscribe()
+  try {
+    subscription = supabase
+        .channel('orders_changes')
+        .on(
+        'postgres_changes',
+        {
+            event: '*',
+            schema: 'public',
+            table: 'orders',
+        },
+        () => {
+            loadOrders()
+        }
+        )
+        .subscribe()
+  } catch (e) {
+      console.error('Subscription error:', e)
+  }
 }
 
 // ... helper functions ...
@@ -100,6 +109,12 @@ onUnmounted(() => {
 
     <div v-if="loading" class="loading">
       <div v-for="i in 3" :key="i" class="skeleton-order"></div>
+    </div>
+
+    <div v-else-if="error" class="error-state">
+        <p>Ошибка загрузки заказов</p>
+        <p class="error-detail">{{ error }}</p>
+        <button @click="loadOrders" class="retry-btn">Попробовать снова</button>
     </div>
 
     <div v-else-if="orders.length === 0" class="empty-state">
@@ -188,6 +203,27 @@ onUnmounted(() => {
   font-size: 4rem;
   margin-bottom: var(--spacing-md);
   opacity: 0.5;
+}
+
+.error-state {
+    text-align: center;
+    padding: var(--spacing-xl);
+    color: var(--color-error);
+}
+
+.error-detail {
+    font-size: 0.8rem;
+    margin-bottom: 1rem;
+    opacity: 0.8;
+}
+
+.retry-btn {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
 }
 
 .orders-list {
