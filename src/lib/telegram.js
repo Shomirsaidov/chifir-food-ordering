@@ -156,7 +156,6 @@ export async function sendTelegramNotification(order, user, items, totalOrdersCo
     }).join('\n')
 
     // Calculated totals
-    const itemsTotalAmount = cartStore.totalAmount // In memory store has correct items total
     const deliveryCost = (deliveryFee / 100).toFixed(0)
     const totalOrderAmount = (order.total_amount / 100).toFixed(0)
 
