@@ -33,7 +33,7 @@ const router = useRouter()
             <div class="icon-circle">📞</div>
             <div class="contact-details">
               <h3>Наш телефон</h3>
-              <a href="tel:+79600497264" class="phone-link">+7 (960) 049-72-64</a>
+              <a href="tel:+79600497264" class="phone-link">+8 (996) 903-22-00</a>
               <p class="contact-note">По любым вопросам звоните нам</p>
             </div>
           </div>
@@ -50,7 +50,7 @@ const router = useRouter()
             <div class="icon-circle">⏰</div>
             <div class="contact-details">
               <h3>Режим работы</h3>
-              <p class="address-text">Ежедневно: 12:00 - 00:00</p>
+              <p class="address-text">Ежедневно: 11:00 - 23:30</p>
             </div>
           </div>
         </div>

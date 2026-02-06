@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS orders (
   table_location TEXT NOT NULL,
   comment TEXT,
   total_amount INTEGER NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('new', 'in_progress', 'ready')),
+  status TEXT NOT NULL CHECK (status IN ('new', 'confirmed', 'cooking', 'ready', 'courier', 'delivery', 'completed', 'cancelled')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
