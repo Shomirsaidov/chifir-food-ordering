@@ -1,8 +1,8 @@
 <template>
   <div class="admin-menu">
     <div class="header">
-      <button @click="$router.push('/admin/dashboard')" class="back-btn">← Back</button>
-      <h1>Menu Management</h1>
+      <button @click="$router.back()" class="back-btn">← Назад</button>
+      <h1>Управление меню</h1>
       <button @click="openNewItem" class="add-btn">+</button>
     </div>
 
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Menu Items List -->
-    <div v-if="loading" class="loading">Loading...</div>
+    <div v-if="loading" class="loading">Загрузка...</div>
     
     <div v-else class="items-list">
       <div v-for="item in filteredItems" :key="item.id" class="item-row">
@@ -27,7 +27,7 @@
           <div class="item-name">{{ item.name }}</div>
           <div class="item-price">{{ (item.price / 100).toFixed(0) }} ₽</div>
           <div class="item-status" :class="{ inactive: !item.is_active }">
-            {{ item.is_active ? 'Active' : 'Hidden' }}
+            {{ item.is_active ? 'Активен' : 'Скрыт' }}
           </div>
         </div>
         
@@ -110,7 +110,7 @@ function editItem(item) {
 }
 
 async function deleteItem(item) {
-  if (!confirm(`Delete "${item.name}"?`)) return
+  if (!confirm(`Удалить "${item.name}"?`)) return
   
   const { error } = await supabase
     .from('menu_items')
@@ -120,7 +120,7 @@ async function deleteItem(item) {
   if (!error) {
     await loadData()
   } else {
-    alert('Error deleting: ' + error.message)
+    alert('Ошибка удаления: ' + error.message)
   }
 }
 

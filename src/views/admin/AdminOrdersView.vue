@@ -1,15 +1,15 @@
 <template>
   <div class="admin-orders">
     <div class="header">
-      <button @click="$router.push('/admin/dashboard')" class="back-btn">← Back</button>
-      <h1>Orders</h1>
+      <button @click="$router.back()" class="back-btn">← Назад</button>
+      <h1>Заказы</h1>
       <button @click="loadOrders" class="refresh-btn">↻</button>
     </div>
 
-    <div v-if="loading" class="loading">Loading orders...</div>
+    <div v-if="loading" class="loading">Загрузка заказов...</div>
 
     <div v-else-if="orders.length === 0" class="empty-state">
-      <p>No active orders</p>
+      <p>Нет активных заказов</p>
     </div>
 
     <div v-else class="orders-list">
@@ -62,7 +62,7 @@
           </div>
           
           <div class="order-total">
-            Total: {{ formatPrice(order.total_amount) }}
+            Сумма: {{ formatPrice(order.total_amount) }}
           </div>
         </div>
 
@@ -73,7 +73,7 @@
             :class="['status-btn', { active: order.status === status }]"
             @click="updateStatus(order.id, status)"
           >
-            {{ status }}
+            {{ status === 'new' ? 'Новый' : 'Готов' }}
           </button>
         </div>
       </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="admin-login">
     <div class="login-card">
-      <h1>Admin Access</h1>
-      <p>Enter PIN code to continue</p>
+      <h1>Панель управления</h1>
+      <p>Введите PIN-код для входа</p>
       
       <form @submit.prevent="handleLogin">
         <input 
@@ -21,7 +21,7 @@
         </div>
         
         <button type="submit" class="login-btn" :disabled="loading">
-          {{ loading ? 'Checking...' : 'Login' }}
+          {{ loading ? 'Проверка...' : 'Войти' }}
         </button>
       </form>
     </div>
@@ -58,7 +58,7 @@ function handleLogin() {
       sessionStorage.setItem('admin_auth', 'true')
       router.push('/admin/dashboard')
     } else {
-      error.value = 'Invalid PIN code'
+      error.value = 'Неверный PIN-код'
       pin.value = ''
       pinInput.value?.focus()
     }

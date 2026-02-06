@@ -1,21 +1,21 @@
 <template>
   <div class="admin-dashboard">
     <div class="header">
-      <h1>Admin Dashboard</h1>
-      <button @click="logout" class="logout-btn">Logout</button>
+      <h1>Панель управления</h1>
+      <button @click="logout" class="logout-btn">Выйти</button>
     </div>
 
     <div class="dashboard-grid">
       <div class="card" @click="$router.push('/admin/orders')">
         <div class="icon">📦</div>
-        <h2>Orders</h2>
-        <p>Manage incoming orders</p>
+        <h2>Заказы</h2>
+        <p>Управление заказами</p>
       </div>
 
       <div class="card" @click="$router.push('/admin/menu')">
         <div class="icon">🍱</div>
-        <h2>Menu</h2>
-        <p>Edit items and prices</p>
+        <h2>Меню</h2>
+        <p>Управление товарами и ценами</p>
       </div>
     </div>
   </div>

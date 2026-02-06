@@ -2,18 +2,18 @@
   <div class="product-form-modal">
     <div class="modal-content">
       <div class="header">
-        <h2>{{ isEdit ? 'Edit Item' : 'New Item' }}</h2>
+        <h2>{{ isEdit ? 'Редактировать товар' : 'Новый товар' }}</h2>
         <button @click="$emit('close')" class="close-btn">×</button>
       </div>
 
       <form @submit.prevent="save">
         <div class="form-group">
-          <label>Name</label>
+          <label>Название</label>
           <input v-model="form.name" required />
         </div>
 
         <div class="form-group">
-          <label>Category</label>
+          <label>Категория</label>
           <select v-model="form.category_id" required>
             <option v-for="cat in categories" :key="cat.id" :value="cat.id">
               {{ cat.name }}
@@ -22,33 +22,31 @@
         </div>
 
         <div class="form-group">
-          <label>Price (₽)</label>
+          <label>Цена (₽)</label>
           <input v-model="displayPrice" type="number" required min="0" step="1" />
-          <span class="hint">Stored as {{ form.price }} tiyin</span>
         </div>
         
         <div class="form-group">
-          <label>Description</label>
+          <label>Описание</label>
           <textarea v-model="form.description" rows="3"></textarea>
         </div>
 
         <div class="form-group">
-          <label>Image Location (Internal or URL)</label>
-          <input v-model="form.image_loc" placeholder="sushi.jpg OR https://..." />
-          <span class="hint">Use filename for assets/images/ or full URL</span>
+          <label>Ссылка на изображение</label>
+          <input v-model="form.image_loc" placeholder="sushi.jpg ИЛИ https://..." />
         </div>
 
         <div class="form-group checkbox">
           <label>
             <input type="checkbox" v-model="form.is_active" />
-            Active (Visible in menu)
+            Активен (Виден в меню)
           </label>
         </div>
 
         <div class="actions">
-          <button type="button" @click="$emit('close')" class="cancel-btn">Cancel</button>
+          <button type="button" @click="$emit('close')" class="cancel-btn">Отмена</button>
           <button type="submit" class="save-btn" :disabled="saving">
-            {{ saving ? 'Saving...' : 'Save' }}
+            {{ saving ? 'Сохранение...' : 'Сохранить' }}
           </button>
         </div>
       </form>
@@ -102,7 +100,7 @@ async function save() {
   } else {
     // Basic validation
     if (!dataToSave.name || dataToSave.price <= 0) {
-        alert('Please fill in name and price')
+        alert('Пожалуйста, заполните название и цену')
         saving.value = false
         return
     }
@@ -122,7 +120,7 @@ async function save() {
   if (!error) {
     emit('saved')
   } else {
-    alert('Error saving: ' + error.message)
+    alert('Ошибка при сохранении: ' + error.message)
   }
 }
 </script>

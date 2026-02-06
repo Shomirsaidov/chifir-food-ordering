@@ -57,7 +57,7 @@ function close() {
           <div v-if="cartStore.isEmpty" class="empty-cart">
             <div class="empty-icon">🛒</div>
             <p>Корзина пуста</p>
-            <button class="btn btn-primary" @click="close">Вернуться к меню</button>
+            <button class="btn btn-primary" @click="router.push('/'); emit('close')">Вернуться к меню</button>
           </div>
 
           <div v-else class="cart-items">
