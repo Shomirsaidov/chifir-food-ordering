@@ -82,6 +82,17 @@ watchEffect(() => {
         <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
       </button>
 
+      <button class="action-item" @click="router.push('/about')">
+        <div class="icon-box purple">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        </div>
+        <div class="action-info">
+          <span class="action-title">О нас</span>
+          <span class="action-desc">Информация о заведении, контакты</span>
+        </div>
+        <svg class="chevron" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+
       <button v-if="isAdmin" class="action-item" @click="goToAdminPanel">
         <div class="icon-box orange">
            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
@@ -240,6 +251,7 @@ watchEffect(() => {
 
 .icon-box.blue { background: var(--color-accent); box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
 .icon-box.orange { background: var(--color-warning); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+.icon-box.purple { background: #8b5cf6; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3); }
 
 .action-info {
   flex: 1;

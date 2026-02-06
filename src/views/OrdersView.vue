@@ -133,6 +133,7 @@ function getStatusClass(status) {
     'confirmed': 'status-process',
     'cooking': 'status-process',
     'ready': 'status-ready',
+    'courier': 'status-courier',
     'delivery': 'status-process',
     'completed': 'status-completed',
     'cancelled': 'status-cancelled'
@@ -146,6 +147,7 @@ function getStatusText(status) {
         'confirmed': 'Подтвержден',
         'cooking': 'Готовится',
         'ready': 'Готов',
+        'courier': 'У курьера',
         'delivery': 'В пути',
         'completed': 'Завершен',
         'cancelled': 'Отменен'
@@ -321,6 +323,7 @@ onUnmounted(() => {
 .status-new { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
 .status-process { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 .status-ready { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.status-courier { background: rgba(139, 92, 246, 0.2); color: #a78bfa; }
 .status-completed { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
 .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 .status-default { background: var(--color-surface); }

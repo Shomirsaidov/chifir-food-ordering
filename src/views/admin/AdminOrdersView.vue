@@ -75,7 +75,7 @@
               :class="['status-btn', { active: order.status === status }]"
               @click="updateStatus(order.id, status)"
             >
-              {{ status === 'new' ? 'Новый' : 'Готов' }}
+              {{ getStatusLabel(status) }}
             </button>
           </div>
         </div>
@@ -91,7 +91,7 @@ import { supabase } from '../../lib/supabase'
 const orders = ref([])
 const loading = ref(true)
 
-const statusOptions = ['new', 'ready']
+const statusOptions = ['new', 'ready', 'courier']
 
 const groupedOrders = computed(() => {
   const groups = {}
@@ -132,7 +132,7 @@ async function loadOrders() {
         menu_item_name
       )
     `)
-    .in('status', ['new', 'ready']) // Only show active orders
+    .in('status', ['new', 'ready', 'courier']) // Include courier status
     .order('created_at', { ascending: false })
 
   if (data) {
@@ -158,6 +158,15 @@ async function updateStatus(orderId, status) {
 
 function formatTime(dateStr) {
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function getStatusLabel(status) {
+  const map = {
+    new: 'Новый',
+    ready: 'Готов',
+    courier: 'У курьера'
+  }
+  return map[status] || status
 }
 
 function formatGroupDate(dateStr) {
@@ -245,6 +254,7 @@ h1 {
 .order-card.new { border-left-color: var(--color-accent); }
 .order-card.cooking { border-left-color: #f59e0b; }
 .order-card.ready { border-left-color: var(--color-success); }
+.order-card.courier { border-left-color: #8b5cf6; }
 .order-card.completed { border-left-color: var(--color-text-secondary); opacity: 0.7; }
 
 .order-header {
