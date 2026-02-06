@@ -195,21 +195,18 @@ onMounted(() => {
                   <h3>Бесплатная доставка</h3>
                   <p>От 1200₽</p>
                </div>
-               <div class="banner-img">🛵</div>
             </div>
             <div class="banner-card gradient-2">
                <div class="banner-text">
                   <h3>Подарок к заказу</h3>
                   <p>При заказе на 1500 ролл запеченный в подарок</p>
                </div>
-               <div class="banner-img">🎁</div>
             </div>
             <div class="banner-card gradient-3">
                <div class="banner-text">
                   <h3>Приведи друзей</h3>
                   <p>Пригласи три друга и получи ролл запеченный в подарок</p>
                </div>
-               <div class="banner-img">👥</div>
             </div>
          </div>
       </section>
@@ -375,15 +372,21 @@ onMounted(() => {
 }
 
 .gradient-1 {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('../assets/images/banner1.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 
 .gradient-2 {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('../assets/images/banner2.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 
 .gradient-3 {
-  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('../assets/images/banner3.jpeg');
+  background-size: cover;
+  background-position: center;
 }
 
 .banner-text h3 {
