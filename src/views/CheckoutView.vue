@@ -228,7 +228,7 @@ async function submitOrder() {
       <!-- Delivery Fields -->
       <transition name="fade" mode="out-in">
         <div v-if="deliveryType === 'delivery'" class="form-section">
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom: 15px;">
             <input
               id="street"
               v-model="street"
