@@ -70,33 +70,21 @@ async function submitOrder() {
     }
 
     // User logic: Upsert user
-    let userData
     const safeTelegramId = telegramId || 123456789
     
-    const { data: existingUser } = await supabase
+    const { data: userData, error: userError } = await supabase
       .from('users')
+      .upsert({
+          telegram_id: safeTelegramId,
+          username: user?.username || null,
+          first_name: user?.first_name || 'Guest',
+          last_name: user?.last_name || null,
+          updated_at: new Date().toISOString(),
+      }, { onConflict: 'telegram_id' })
       .select('id, telegram_id')
-      .eq('telegram_id', safeTelegramId)
       .single()
 
-    if (existingUser) {
-      userData = existingUser
-    } else {
-      const { data: newUser, error: createError } = await supabase
-        .from('users')
-        .upsert({
-            telegram_id: safeTelegramId,
-            username: user?.username || null,
-            first_name: user?.first_name || 'Guest',
-            last_name: user?.last_name || null,
-            updated_at: new Date().toISOString(),
-        })
-        .select('id, telegram_id')
-        .single()
-      
-      if (createError) throw createError
-      userData = newUser
-    }
+    if (userError) throw userError
 
     // Create Order
     const orderData = {
