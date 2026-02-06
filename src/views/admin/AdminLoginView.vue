@@ -39,7 +39,7 @@ const loading = ref(false)
 const pinInput = ref(null)
 
 // Simple hardcoded PIN for now (as requested in plan)
-const ADMIN_PIN = '1234'
+const ADMIN_PIN = '1412'
 
 onMounted(() => {
   pinInput.value?.focus()
