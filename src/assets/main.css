@@ -1,20 +1,20 @@
 :root {
-  /* Premium Dark Theme Palette (Slate + Blue) */
-  --color-primary: #0f172a;
-  /* Slate 900 - Main Background */
-  --color-secondary: #1e293b;
-  /* Slate 800 - Cards/Surfaces */
-  --color-surface: #334155;
-  /* Slate 700 - Hover states/Inputs */
+  /* Refreshed Premium Dark Theme (Deep Navy + Vibrant Blue) */
+  --color-primary: #050811;
+  /* Very Deep Navy - High Contrast Background */
+  --color-secondary: #0f172a;
+  /* Slate 900 - Cards/Surfaces */
+  --color-surface: #1e293b;
+  /* Slate 800 - Interaction elements */
 
-  --color-accent: #3b82f6;
-  /* Blue 500 - Primary Actions */
-  --color-accent-hover: #2563eb;
+  --color-accent: #60a5fa;
+  /* Bright Blue - High visibility */
+  --color-accent-hover: #3b82f6;
 
-  --color-text: #f1f5f9;
-  /* Slate 100 - Primary Text */
-  --color-text-secondary: #94a3b8;
-  /* Slate 400 - Secondary Text */
+  --color-text: #f8fafc;
+  /* High contrast white */
+  --color-text-secondary: #cbd5e1;
+  /* Slate 300 - Brighter secondary text */
 
   --color-success: #10b981;
   /* Emerald 500 */

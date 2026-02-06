@@ -21,6 +21,8 @@ const categoryEmojis = {
   'Супы': '🍜',
   'Салаты': '🥗',
   'Пицца': '🍕',
+  'Сеты': '🍱',
+  'Горячие закуски': '🥘',
   'default': '🍽️'
 }
 
@@ -66,6 +68,8 @@ async function loadData() {
       { id: '4', name: 'Супы', sort_order: 4, created_at: new Date().toISOString() },
       { id: '5', name: 'Салаты', sort_order: 5, created_at: new Date().toISOString() },
       { id: '6', name: 'Пицца', sort_order: 6, created_at: new Date().toISOString() },
+      { id: '7', name: 'Сеты', sort_order: 7, created_at: new Date().toISOString() },
+      { id: '8', name: 'Горячие закуски', sort_order: 8, created_at: new Date().toISOString() },
     ]
     categories.value = mockCategories
     selectedCategory.value = mockCategories[0].id
@@ -185,6 +189,13 @@ onMounted(() => {
                   <p>При заказе на 1500 ролл запеченный в подарок</p>
                </div>
                <div class="banner-img">🎁</div>
+            </div>
+            <div class="banner-card gradient-3">
+               <div class="banner-text">
+                  <h3>Приведи друзей</h3>
+                  <p>Пригласи три друга и получи ролл запеченный в подарок</p>
+               </div>
+               <div class="banner-img">👥</div>
             </div>
          </div>
       </section>
@@ -355,6 +366,10 @@ onMounted(() => {
 
 .gradient-2 {
   background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.gradient-3 {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
 }
 
 .banner-text h3 {
