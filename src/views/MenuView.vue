@@ -175,16 +175,16 @@ onMounted(() => {
             <div class="banner-card gradient-1">
                <div class="banner-text">
                   <h3>Бесплатная доставка</h3>
-                  <p>От 1500₽</p>
+                  <p>От 1200₽</p>
                </div>
                <div class="banner-img">🛵</div>
             </div>
             <div class="banner-card gradient-2">
                <div class="banner-text">
-                  <h3>Новинка: Острый Бургер</h3>
-                  <p>Попробуйте! 🔥</p>
+                  <h3>Подарок к заказу</h3>
+                  <p>При заказе на 1500 ролл запеченный в подарок</p>
                </div>
-               <div class="banner-img">🍔</div>
+               <div class="banner-img">🎁</div>
             </div>
          </div>
       </section>

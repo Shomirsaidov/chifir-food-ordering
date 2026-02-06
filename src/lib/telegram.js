@@ -188,7 +188,7 @@ ${itemsList}
     try {
         const url = BOT_API_URL
             ? `${BOT_API_URL}/api/notify`
-            : `https://api.telegram.org/bot8431199932:AAGoQyxcX5M7I8lUQiX2jTb_EcWJN6scjRw/sendMessage`
+            : `https://api.telegram.org/bot8414786040:AAFrMCdsKFZCn1z8BEZJe2BbA_IJ0n23LPY/sendMessage`
 
         await fetch(url, {
             method: 'POST',
