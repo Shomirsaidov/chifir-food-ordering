@@ -50,7 +50,7 @@ const router = useRouter()
             <div class="icon-circle">⏰</div>
             <div class="contact-details">
               <h3>Режим работы</h3>
-              <p class="address-text">Ежедневно: 10:00 - 23:00</p>
+              <p class="address-text">Ежедневно: 12:00 - 00:00</p>
             </div>
           </div>
         </div>
