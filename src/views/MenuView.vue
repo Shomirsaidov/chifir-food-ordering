@@ -144,7 +144,7 @@ onMounted(() => {
       <div class="header-content container">
         <div class="logo">
           <span class="logo-icon">🍔</span>
-          <span class="logo-text">Chifir</span>
+          <span class="logo-text">Uno8</span>
         </div>
         <div class="actions">
           <button class="icon-btn search-btn" @click="toggleSearch" :class="{ 'active': isSearchOpen }">

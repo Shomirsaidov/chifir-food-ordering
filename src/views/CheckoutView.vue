@@ -13,11 +13,12 @@ const userStore = useUserStore()
 
 // State
 const deliveryType = ref('delivery')
-const address = ref('')
+const street = ref('')
+const house = ref('')
+const apartment = ref('')
 const phoneNumber = ref('+7 ')
 const paymentMethod = ref('transfer')
 const utensilsCount = ref(1)
-const cashChangeFrom = ref('')
 const comment = ref('')
 const coordinates = ref(null)
 const loading = ref(false)
@@ -51,8 +52,8 @@ async function submitOrder() {
   }
   
   if (deliveryType.value === 'delivery') {
-    if (!address.value.trim()) {
-      error.value = 'Пожалуйста, укажите адрес доставки'
+    if (!street.value.trim() || !house.value.trim()) {
+      error.value = 'Пожалуйста, укажите улицу и номер дома'
       hapticFeedback('error')
       return
     }
@@ -97,11 +98,13 @@ async function submitOrder() {
       phone_number: phoneNumber.value.trim(),
       payment_method: paymentMethod.value,
       utensils_count: utensilsCount.value,
-      cash_change_from: paymentMethod.value === 'cash' ? cashChangeFrom.value : null,
+      cash_change_from: null,
       comment: comment.value.trim() || null,
       total_amount: cartStore.totalAmount + deliveryFee.value,
       status: 'new',
-      delivery_address: deliveryType.value === 'delivery' ? address.value.trim() : null,
+      delivery_address: deliveryType.value === 'delivery' 
+        ? `${street.value.trim()}, д. ${house.value.trim()}${apartment.value.trim() ? `, кв. ${apartment.value.trim()}` : ''}` 
+        : null,
       delivery_coordinates: deliveryType.value === 'delivery' ? coordinates.value : null,
     }
 
@@ -226,15 +229,35 @@ async function submitOrder() {
       <transition name="fade" mode="out-in">
         <div v-if="deliveryType === 'delivery'" class="form-section">
           <div class="form-group">
-            <label>Адрес</label>
             <input
-              id="address"
-              v-model="address"
+              id="street"
+              v-model="street"
               type="text"
               class="input-field"
-              placeholder="Улица, дом, кв..."
+              placeholder="Улица"
               required
             />
+          </div>
+          <div class="address-grid">
+            <div class="form-group">
+              <input
+                id="house"
+                v-model="house"
+                type="text"
+                class="input-field"
+                placeholder="Дом"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <input
+                id="apartment"
+                v-model="apartment"
+                type="text"
+                class="input-field"
+                placeholder="Номер (кв/офис)"
+              />
+            </div>
           </div>
           <div class="form-group">
             <label>На карте</label>
@@ -278,23 +301,6 @@ async function submitOrder() {
           >
             💳 Перевод
           </button>
-          <button 
-            type="button"
-            class="toggle-option" 
-            :class="{ active: paymentMethod === 'cash' }"
-            @click="paymentMethod = 'cash'"
-          >
-            💵 Наличные
-          </button>
-      </div>
-
-      <div v-if="paymentMethod === 'cash'" class="form-group mt-2">
-        <input
-          v-model="cashChangeFrom"
-          type="text"
-          class="input-field"
-          placeholder="Сдача с (например 5000)"
-        />
       </div>
 
       <!-- Extra -->
@@ -440,6 +446,12 @@ async function submitOrder() {
 .free-delivery span:last-child {
   color: #10b981;
   font-weight: 600;
+}
+
+.address-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
 /* Forms */

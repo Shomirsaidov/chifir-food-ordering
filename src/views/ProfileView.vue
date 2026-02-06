@@ -94,7 +94,7 @@ watchEffect(() => {
       </button>
       
       <div class="app-info">
-        <p>Version 1.0.0 • Chifir App</p>
+        <p>Version 1.0.0 • Uno8 App</p>
       </div>
     </div>
   </div>
