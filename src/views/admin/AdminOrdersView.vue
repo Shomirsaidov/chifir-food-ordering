@@ -13,68 +13,71 @@
     </div>
 
     <div v-else class="orders-list">
-      <div v-for="order in orders" :key="order.id" class="order-card" :class="order.status">
-        <div class="order-header">
-          <span class="order-id">#{{ order.id.slice(0, 8) }}</span>
-          <span class="order-time">{{ formatDate(order.created_at) }}</span>
-        </div>
-        
-        <div class="order-details">
-          <div class="customer-info">
-             <div class="delivery-info">
-               <span v-if="order.delivery_type === 'delivery'" class="info-row">🚗 {{ order.delivery_address }}</span>
-               <span v-else class="info-row">🏃 Самовывоз</span>
-               <span class="info-row">📞 {{ order.phone_number }}</span>
-             </div>
+      <div v-for="(group, date) in groupedOrders" :key="date" class="date-group">
+        <h2 class="date-header">{{ formatGroupDate(date) }}</h2>
+        <div v-for="order in group" :key="order.id" class="order-card" :class="order.status">
+          <div class="order-header">
+            <span class="order-id">#{{ order.id.slice(0, 8) }}</span>
+            <span class="order-time">{{ formatTime(order.created_at) }}</span>
           </div>
-
-          <div class="user-profile" v-if="order.user">
-             <div class="user-avatar">
-               <img v-if="order.user.photo_url" :src="order.user.photo_url" alt="Avatar" />
-               <div v-else class="avatar-placeholder">{{ order.user.first_name ? order.user.first_name.charAt(0) : '?' }}</div>
-             </div>
-             <div class="user-details">
-               <div class="user-name">
-                 {{ order.user.first_name }} {{ order.user.last_name || '' }}
+          
+          <div class="order-details">
+            <div class="customer-info">
+               <div class="delivery-info">
+                 <span v-if="order.delivery_type === 'delivery'" class="info-row">🚗 {{ order.delivery_address }}</span>
+                 <span v-else class="info-row">🏃 Самовывоз</span>
+                 <span class="info-row">📞 {{ order.phone_number }}</span>
                </div>
-               <div class="user-username" v-if="order.user.username">
-                 @{{ order.user.username }}
+            </div>
+
+            <div class="user-profile" v-if="order.user">
+               <div class="user-avatar">
+                 <img v-if="order.user.photo_url" :src="order.user.photo_url" alt="Avatar" />
+                 <div v-else class="avatar-placeholder">{{ order.user.first_name ? order.user.first_name.charAt(0) : '?' }}</div>
                </div>
-             </div>
-          </div>
-          
-          <div class="items-list">
-            <div v-for="item in order.items" :key="item.menu_item_id" class="order-item">
-              <span>{{ item.quantity }}x {{ item.menu_item_name }}</span>
+               <div class="user-details">
+                 <div class="user-name">
+                   {{ order.user.first_name }} {{ order.user.last_name || '' }}
+                 </div>
+                 <div class="user-username" v-if="order.user.username">
+                   @{{ order.user.username }}
+                 </div>
+               </div>
             </div>
-            <div class="extras">
-              <span>🍴 Приборы: {{ order.utensils_count }}</span>
+            
+            <div class="items-list">
+              <div v-for="item in order.items" :key="item.menu_item_id" class="order-item">
+                <span>{{ item.quantity }}x {{ item.menu_item_name }}</span>
+              </div>
+              <div class="extras">
+                <span>🍴 Приборы: {{ order.utensils_count }}</span>
+              </div>
             </div>
-          </div>
-          
-          <div v-if="order.comment" class="order-comment">
-            "{{ order.comment }}"
+            
+            <div v-if="order.comment" class="order-comment">
+              "{{ order.comment }}"
+            </div>
+
+            <div class="payment-info">
+              <span class="badg" :class="order.payment_method">{{ order.payment_method === 'cash' ? 'Наличные' : 'Перевод' }}</span>
+              <span v-if="order.payment_method === 'cash' && order.cash_change_from"> (Сдача с {{ order.cash_change_from }})</span>
+            </div>
+            
+            <div class="order-total">
+              Сумма: {{ formatPrice(order.total_amount) }}
+            </div>
           </div>
 
-          <div class="payment-info">
-            <span class="badg" :class="order.payment_method">{{ order.payment_method === 'cash' ? 'Наличные' : 'Перевод' }}</span>
-            <span v-if="order.payment_method === 'cash' && order.cash_change_from"> (Сдача с {{ order.cash_change_from }})</span>
+          <div class="status-controls">
+            <button 
+              v-for="status in statusOptions" 
+              :key="status"
+              :class="['status-btn', { active: order.status === status }]"
+              @click="updateStatus(order.id, status)"
+            >
+              {{ status === 'new' ? 'Новый' : 'Готов' }}
+            </button>
           </div>
-          
-          <div class="order-total">
-            Сумма: {{ formatPrice(order.total_amount) }}
-          </div>
-        </div>
-
-        <div class="status-controls">
-          <button 
-            v-for="status in statusOptions" 
-            :key="status"
-            :class="['status-btn', { active: order.status === status }]"
-            @click="updateStatus(order.id, status)"
-          >
-            {{ status === 'new' ? 'Новый' : 'Готов' }}
-          </button>
         </div>
       </div>
     </div>
@@ -82,13 +85,25 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { supabase } from '../../lib/supabase'
 
 const orders = ref([])
 const loading = ref(true)
 
 const statusOptions = ['new', 'ready']
+
+const groupedOrders = computed(() => {
+  const groups = {}
+  orders.value.forEach(order => {
+    const date = new Date(order.created_at).toISOString().split('T')[0]
+    if (!groups[date]) {
+      groups[date] = []
+    }
+    groups[date].push(order)
+  })
+  return groups
+})
 
 onMounted(() => {
   loadOrders()
@@ -141,8 +156,23 @@ async function updateStatus(orderId, status) {
   loadOrders()
 }
 
-function formatDate(dateStr) {
+function formatTime(dateStr) {
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
+function formatGroupDate(dateStr) {
+  const date = new Date(dateStr)
+  const today = new Date()
+  const yesterday = new Date()
+  yesterday.setDate(today.getDate() - 1)
+
+  if (date.toDateString() === today.toDateString()) {
+    return 'Сегодня'
+  } else if (date.toDateString() === yesterday.toDateString()) {
+    return 'Вчера'
+  } else {
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+  }
 }
 
 function formatPrice(price) {
@@ -185,7 +215,24 @@ h1 {
 .orders-list {
   display: flex;
   flex-direction: column;
+  gap: 24px;
+}
+
+.date-group {
+  display: flex;
+  flex-direction: column;
   gap: 16px;
+}
+
+.date-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 4px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  align-self: flex-start;
+  margin-bottom: 4px;
 }
 
 .order-card {

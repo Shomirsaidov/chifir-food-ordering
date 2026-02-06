@@ -55,9 +55,23 @@ async function loadData() {
     .order('sort_order')
 
   if (categoriesData && categoriesData.length > 0) {
-    categories.value = categoriesData
-    if (categoriesData.length > 0) {
-      selectedCategory.value = categoriesData[0].id
+    // Add requested categories if missing in DB
+    const required = [
+      { id: 'set-new', name: 'Сеты', sort_order: 100 },
+      { id: 'hot-new', name: 'Горячие закуски', sort_order: 101 }
+    ]
+    
+    const combined = [...categoriesData]
+    required.forEach(req => {
+      if (!combined.find(c => c.name === req.name)) {
+        combined.push(req)
+      }
+    })
+    
+    categories.value = combined.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    
+    if (combined.length > 0 && !selectedCategory.value) {
+      selectedCategory.value = combined[0].id
     }
   } else {
     // Use mock data for development
@@ -228,7 +242,7 @@ onMounted(() => {
 
         <div v-else-if="filteredItems.length === 0" class="empty-state">
           <div class="empty-icon">🔍</div>
-          <p>Nothing found in this category.</p>
+          <p>В этой категории пока ничего нет.</p>
         </div>
 
         <div v-else class="menu-grid">
