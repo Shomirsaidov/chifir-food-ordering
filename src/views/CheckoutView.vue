@@ -19,6 +19,7 @@ const apartment = ref('')
 const phoneNumber = ref('+7 ')
 const paymentMethod = ref('transfer')
 const utensilsCount = ref(1)
+const cashChangeFrom = ref('')
 const comment = ref('')
 const coordinates = ref(null)
 const loading = ref(false)
@@ -98,7 +99,7 @@ async function submitOrder() {
       phone_number: phoneNumber.value.trim(),
       payment_method: paymentMethod.value,
       utensils_count: utensilsCount.value,
-      cash_change_from: null,
+      cash_change_from: paymentMethod.value === 'cash' ? cashChangeFrom.value : null,
       comment: comment.value.trim() || null,
       total_amount: cartStore.totalAmount + deliveryFee.value,
       status: 'new',
@@ -310,6 +311,23 @@ async function submitOrder() {
           >
             💳 Перевод
           </button>
+          <button 
+            type="button"
+            class="toggle-option" 
+            :class="{ active: paymentMethod === 'cash' }"
+            @click="paymentMethod = 'cash'"
+          >
+            💵 Наличные
+          </button>
+      </div>
+
+      <div v-if="paymentMethod === 'cash'" class="form-group mt-2">
+        <input
+          v-model="cashChangeFrom"
+          type="text"
+          class="input-field"
+          placeholder="Сдача с (например 5000)"
+        />
       </div>
 
       <!-- Extra -->
