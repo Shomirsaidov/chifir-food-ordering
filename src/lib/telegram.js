@@ -134,7 +134,7 @@ export function hapticFeedback(type = 'light') {
 /**
  * Send order notification to Telegram Bot
  */
-export async function sendTelegramNotification(order, user, items, totalOrdersCount) {
+export async function sendTelegramNotification(order, user, items, totalOrdersCount, deliveryFee = 0) {
     const BOT_TOKEN = '8431199932:AAGoQyxcX5M7I8lUQiX2jTb_EcWJN6scjRw'
     const chat_id = user.telegram_id
 
@@ -156,21 +156,9 @@ export async function sendTelegramNotification(order, user, items, totalOrdersCo
     }).join('\n')
 
     // Calculated totals
-    const itemsTotal = (order.total_amount / 100).toFixed(0) // Assuming total_amount includes delivery, need to separate if so. usually cartStore.totalAmount is items total.
-    // In CheckoutView: total_amount = cartStore.totalAmount (items only usually, let's verify if delivery is added).
-    // Actually in CheckoutView, total_amount is passed as cartStore.totalAmount. 
-    // And delivery cost isn't explicitly calculated in the total stored in DB yet? 
-    // Wait, the user example shows "Delivery Cost: 400". 
-    // I need to check if we have delivery cost logic. 
-    // Checking CheckoutView... total_amount is just cartStore.totalAmount.
-    // I will assume for now delivery is free or not yet implemented fully in calculation, 
-    // BUT the user prompt example implies specific costs. 
-    // For now I will stick to what we have:
-    // Items Cost = order.total_amount
-    // Delivery Cost = 0 (or hardcode/adjust if logic exists)
-    // Total = Items + Delivery
-
-    // Let's assume delivery is 0 for now as I don't see it in cart store.
+    const itemsTotalAmount = cartStore.totalAmount // In memory store has correct items total
+    const deliveryCost = (deliveryFee / 100).toFixed(0)
+    const totalOrderAmount = (order.total_amount / 100).toFixed(0)
 
     const text = `
 🔸 Мы получили ваш заказ 🔸
@@ -187,8 +175,9 @@ ${order.payment_method === 'cash' && order.cash_change_from ? `Сдача с с�
 Состав заказа:
 ${itemsList}
 ------------------------------
-Стоимость товаров: ${itemsTotal}₽
-Итого: ${itemsTotal}₽
+Стоимость товаров: ${(order.total_amount - deliveryFee) / 100}₽
+Доставка: ${deliveryCost}₽
+Итого: ${totalOrderAmount}₽
 ------------------------------
 Спасибо за заказ. Вы сделали уже ${totalOrdersCount} заказов.
 `.trim()

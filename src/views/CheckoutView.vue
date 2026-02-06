@@ -14,7 +14,7 @@ const userStore = useUserStore()
 // State
 const deliveryType = ref('delivery')
 const address = ref('')
-const phoneNumber = ref('')
+const phoneNumber = ref('+7 ')
 const paymentMethod = ref('transfer')
 const utensilsCount = ref(1)
 const cashChangeFrom = ref('')
@@ -24,8 +24,12 @@ const loading = ref(false)
 const error = ref('')
 
 // Computed
+const deliveryFee = computed(() => {
+  return (deliveryType.value === 'delivery' && cartStore.totalAmount < 120000) ? 15000 : 0
+})
+
 const formattedTotal = computed(() => {
-  return (cartStore.totalAmount / 100).toFixed(0) + ' \u20BD' // Ruble sign
+  return ((cartStore.totalAmount + deliveryFee.value) / 100).toFixed(0) + ' \u20BD' // Ruble sign
 })
 
 function formatPrice(price) {
@@ -95,7 +99,7 @@ async function submitOrder() {
       utensils_count: utensilsCount.value,
       cash_change_from: paymentMethod.value === 'cash' ? cashChangeFrom.value : null,
       comment: comment.value.trim() || null,
-      total_amount: cartStore.totalAmount,
+      total_amount: cartStore.totalAmount + deliveryFee.value,
       status: 'new',
       delivery_address: deliveryType.value === 'delivery' ? address.value.trim() : null,
       delivery_coordinates: deliveryType.value === 'delivery' ? coordinates.value : null,
@@ -132,7 +136,7 @@ async function submitOrder() {
 
     // Notify Telegram
     try {
-        await sendTelegramNotification(order, userData, cartStore.items, count || 1)
+        await sendTelegramNotification(order, userData, cartStore.items, count || 1, deliveryFee.value)
     } catch (e) {
         console.error('Notification failed but order placed', e)
     }
@@ -175,6 +179,17 @@ async function submitOrder() {
              <span class="item-qty">{{ item.quantity }}x</span>
              <span class="item-price">{{ formatPrice(item.menuItem.price * item.quantity) }}</span>
            </div>
+        </div>
+      </div>
+      
+      <div class="summary-details">
+        <div class="summary-row">
+          <span>Сумма заказа</span>
+          <span>{{ formatPrice(cartStore.totalAmount) }}</span>
+        </div>
+        <div class="summary-row" :class="{ 'free-delivery': deliveryFee === 0 && deliveryType === 'delivery' }">
+          <span>Доставка</span>
+          <span>{{ deliveryType === 'delivery' ? (deliveryFee > 0 ? formatPrice(deliveryFee) : 'Бесплатно') : '—' }}</span>
         </div>
       </div>
       
@@ -231,7 +246,7 @@ async function submitOrder() {
           <div class="icon">📍</div>
           <div>
             <strong>Адрес ресторана:</strong>
-            <p>ул. Рудаки 15, Душанбе</p>
+            <p>Галий Кайбицкой 6а, Казань</p>
           </div>
         </div>
       </transition>
@@ -407,6 +422,25 @@ async function submitOrder() {
 }
 
 .total-amount { color: var(--color-accent); }
+
+.summary-details {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+}
+
+.free-delivery span:last-child {
+  color: #10b981;
+  font-weight: 600;
+}
 
 /* Forms */
 .checkout-form {
