@@ -135,8 +135,12 @@ export function hapticFeedback(type = 'light') {
  * Send order notification to Telegram Bot
  */
 export async function sendTelegramNotification(order, user, items, totalOrdersCount, deliveryFee = 0) {
-    const BOT_TOKEN = '8431199932:AAGoQyxcX5M7I8lUQiX2jTb_EcWJN6scjRw'
     const chat_id = user.telegram_id
+    const BOT_API_URL = import.meta.env.VITE_BOT_API_URL || ''
+
+    if (!BOT_API_URL) {
+        console.warn('VITE_BOT_API_URL is not configured. Falling back to direct bot API (not recommended).')
+    }
 
     // Format date
     const date = new Date(order.created_at)
@@ -182,7 +186,11 @@ ${itemsList}
 `.trim()
 
     try {
-        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        const url = BOT_API_URL
+            ? `${BOT_API_URL}/api/notify`
+            : `https://api.telegram.org/bot8431199932:AAGoQyxcX5M7I8lUQiX2jTb_EcWJN6scjRw/sendMessage`
+
+        await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({

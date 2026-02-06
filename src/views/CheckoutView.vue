@@ -141,7 +141,8 @@ async function submitOrder() {
     try {
         await sendTelegramNotification(order, userData, cartStore.items, count || 1, deliveryFee.value)
     } catch (e) {
-        console.error('Notification failed but order placed', e)
+        console.warn('Telegram notification failed:', e)
+        // We don't throw here so the user still sees their order as successful
     }
 
     hapticFeedback('success')
@@ -149,8 +150,16 @@ async function submitOrder() {
     router.replace('/orders')
 
   } catch (err) {
-    console.error('Order error:', err)
-    error.value = err.message || 'Ошибка сервера'
+    console.error('Order submission error:', err)
+    
+    let userMessage = 'Ошибка при оформлении заказа'
+    if (err.name === 'TypeError' && err.message === 'Load failed') {
+      userMessage = 'Ошибка сети. Пожалуйста, попробуйте еще раз или проверьте интернет.'
+    } else if (err.message) {
+      userMessage = err.message
+    }
+    
+    error.value = userMessage
     hapticFeedback('error')
   } finally {
     loading.value = false
