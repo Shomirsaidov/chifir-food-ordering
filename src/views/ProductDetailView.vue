@@ -54,25 +54,21 @@
 
     <!-- Bottom Action Bar -->
     <div v-if="product" class="action-bar glass">
-      <!-- If item is already in cart, show controls [-] Qty [+] -->
-      <div v-if="cartQuantity > 0" class="cart-controls">
-        <button @click="decreaseCartQuantity" class="control-btn minus">
-           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        </button>
-        <span class="quantity-display">
-          <span class="qty">{{ cartQuantity }}</span>
-          <span class="price-sum">{{ formatPrice(product.price * cartQuantity) }}</span>
-        </span>
-        <button @click="increaseCartQuantity" class="control-btn plus">
-           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      <div class="product-controls">
+        <div class="quantity-selector">
+          <button @click="decreaseLocalQuantity" class="q-btn minus">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+          <span class="q-value">{{ localQuantity }}</span>
+          <button @click="increaseLocalQuantity" class="q-btn plus">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </button>
+        </div>
+        
+        <button @click="handleAddToCart" class="btn btn-primary main-add-btn">
+          <span>В КОРЗИНУ {{ formatPrice(product.price * localQuantity) }}</span>
         </button>
       </div>
-
-      <!-- Otherwise show big ADD button -->
-      <button v-else @click="increaseCartQuantity" class="btn btn-primary add-to-cart-btn">
-        <span class="btn-text">В корзину</span>
-        <span class="btn-price">{{ formatPrice(product.price) }}</span>
-      </button>
     </div>
   </div>
 </template>
@@ -92,13 +88,6 @@ const cartStore = useCartStore()
 const product = ref(null)
 const loading = ref(true)
 const isFavorite = ref(false)
-
-// Computed quantity from cart for this specific item
-const cartQuantity = computed(() => {
-  if (!product.value) return 0
-  const cartItem = cartStore.items.find(i => i.menuItem.id === product.value?.id)
-  return cartItem ? cartItem.quantity : 0
-})
 
 onMounted(async () => {
   await loadProduct()
@@ -121,20 +110,28 @@ async function loadProduct() {
   loading.value = false
 }
 
-function increaseCartQuantity() {
-  if (!product.value) return
+const localQuantity = ref(1)
+
+function increaseLocalQuantity() {
   hapticFeedback('selection')
-  cartStore.addItem(product.value)
+  localQuantity.value++
 }
 
-function decreaseCartQuantity() {
-  if (!product.value) return
-  hapticFeedback('selection')
-  const currentQty = cartQuantity.value
-  if (currentQty > 0) {
-    cartStore.updateQuantity(product.value.id, currentQty - 1)
+function decreaseLocalQuantity() {
+  if (localQuantity.value > 1) {
+    hapticFeedback('selection')
+    localQuantity.value--
   }
 }
+
+function handleAddToCart() {
+  if (!product.value) return
+  hapticFeedback('success')
+  cartStore.addItem(product.value, localQuantity.value)
+  router.push('/')
+}
+
+
 
 function toggleFavorite() {
     isFavorite.value = !isFavorite.value
@@ -303,75 +300,57 @@ function formatPrice(price) {
   justify-content: center;
 }
 
-/* Cart Controls */
-.cart-controls {
+/* Product Controls */
+.product-controls {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 16px;
   width: 100%;
-  max-width: 400px;
-  background: var(--color-secondary);
-  padding: 6px;
-  border-radius: var(--radius-xl);
 }
 
-.control-btn {
-  width: 48px;
-  height: 48px;
+.quantity-selector {
+  display: flex;
+  align-items: center;
+  background: var(--color-secondary);
+  padding: 4px;
   border-radius: var(--radius-lg);
-  border: none;
-  background: var(--color-surface);
+  gap: 8px;
+}
+
+.q-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--color-accent);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: none;
   cursor: pointer;
   transition: all var(--transition-base);
 }
 
-.control-btn:active {
+.q-btn:active {
   transform: scale(0.92);
 }
 
-.quantity-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.qty {
-  font-size: 1.25rem;
+.q-value {
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-text);
+  min-width: 24px;
+  text-align: center;
 }
 
-.price-sum {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-}
-
-.add-to-cart-btn {
-  width: 100%;
-  max-width: 400px;
+.main-add-btn {
+  flex: 1;
   height: 56px;
-  border-radius: var(--radius-xl);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 24px;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
-.btn-text {
-    font-size: 1.1rem;
-    font-weight: 600;
-}
-
-.btn-price {
-    font-weight: 700;
-    background: rgba(255,255,255,0.2);
-    padding: 4px 10px;
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-}
+/* Transitions */
 </style>
