@@ -1,7 +1,7 @@
 <template>
   <div class="admin-orders">
     <div class="header">
-      <router-link to="/admin/dashboard" class="back-btn">← Панель</router-link>
+      <button @click="$router.push('/admin/dashboard')" class="back-btn">← Панель</button>
       <h1>Заказы</h1>
       <button @click="loadOrders" class="refresh-btn">↻</button>
     </div>
@@ -246,7 +246,7 @@ h1 {
 .back-btn, .refresh-btn {
   background: none;
   border: none;
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: 16px;
   cursor: pointer;
 }
