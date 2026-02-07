@@ -1,15 +1,27 @@
 <template>
   <div class="admin-orders">
     <div class="header">
-      <button @click="$router.back()" class="back-btn">← Назад</button>
+      <router-link to="/admin/dashboard" class="back-btn">← Панель</router-link>
       <h1>Заказы</h1>
       <button @click="loadOrders" class="refresh-btn">↻</button>
     </div>
 
+    <div class="tabs">
+      <button 
+        v-for="tab in tabs" 
+        :key="tab.id" 
+        :class="['tab-btn', { active: selectedTab === tab.id }]"
+        @click="selectedTab = tab.id"
+      >
+        {{ tab.label }}
+        <span v-if="getTabCount(tab.id) > 0" class="tab-count">{{ getTabCount(tab.id) }}</span>
+      </button>
+    </div>
+
     <div v-if="loading" class="loading">Загрузка заказов...</div>
 
-    <div v-else-if="orders.length === 0" class="empty-state">
-      <p>Нет активных заказов</p>
+    <div v-else-if="filteredOrders.length === 0" class="empty-state">
+      <p>Нет заказов в этой категории</p>
     </div>
 
     <div v-else class="orders-list">
@@ -90,12 +102,26 @@ import { supabase } from '../../lib/supabase'
 
 const orders = ref([])
 const loading = ref(true)
+const selectedTab = ref('new')
 
-const statusOptions = ['new', 'ready', 'courier']
+const tabs = [
+  { id: 'new', label: 'Новые' },
+  { id: 'courier', label: 'У курьера' },
+  { id: 'completed', label: 'Завершенные' }
+]
+
+const statusOptions = ['new', 'ready', 'courier', 'completed']
+
+const filteredOrders = computed(() => {
+  if (selectedTab.value === 'new') {
+    return orders.value.filter(o => o.status === 'new' || o.status === 'ready')
+  }
+  return orders.value.filter(o => o.status === selectedTab.value)
+})
 
 const groupedOrders = computed(() => {
   const groups = {}
-  orders.value.forEach(order => {
+  filteredOrders.value.forEach(order => {
     const date = new Date(order.created_at).toISOString().split('T')[0]
     if (!groups[date]) {
       groups[date] = []
@@ -104,6 +130,13 @@ const groupedOrders = computed(() => {
   })
   return groups
 })
+
+function getTabCount(tabId) {
+  if (tabId === 'new') {
+    return orders.value.filter(o => o.status === 'new' || o.status === 'ready').length
+  }
+  return orders.value.filter(o => o.status === tabId).length
+}
 
 onMounted(() => {
   loadOrders()
@@ -132,7 +165,7 @@ async function loadOrders() {
         menu_item_name
       )
     `)
-    .in('status', ['new', 'ready', 'courier']) // Include courier status
+    .in('status', ['new', 'ready', 'courier', 'completed']) 
     .order('created_at', { ascending: false })
 
   if (data) {
@@ -164,7 +197,8 @@ function getStatusLabel(status) {
   const map = {
     new: 'Новый',
     ready: 'Готов',
-    courier: 'У курьера'
+    courier: 'Курьер',
+    completed: 'ОК'
   }
   return map[status] || status
 }
@@ -219,6 +253,46 @@ h1 {
 
 .refresh-btn {
   font-size: 24px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px 4px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 100px;
+  transition: all 0.2s;
+}
+
+.tab-btn.active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+
+.tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
 }
 
 .orders-list {

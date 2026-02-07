@@ -190,13 +190,29 @@ ${itemsList}
             ? `${BOT_API_URL}/api/notify`
             : `https://api.telegram.org/bot8414786040:AAFrMCdsKFZCn1z8BEZJe2BbA_IJ0n23LPY/sendMessage`
 
+        const payload = {
+            text,
+            parse_mode: 'HTML'
+        }
+
+        // Send to user
         await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id,
-                text,
-                parse_mode: 'HTML'
+                ...payload,
+                chat_id: chat_id,
+            })
+        })
+
+        // Also send to Admin
+        const admin_id = '8598361161'
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...payload,
+                chat_id: admin_id,
             })
         })
     } catch (e) {

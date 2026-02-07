@@ -23,6 +23,7 @@ const categoryEmojis = {
   'Пицца': '🍕',
   'Сеты': '🍱',
   'Горячие закуски': '🥘',
+  'Напитки': '🥤',
   'default': '🍽️'
 }
 
@@ -58,7 +59,8 @@ async function loadData() {
     // Add requested categories if missing in DB
     const required = [
       { id: 'set-new', name: 'Сеты', sort_order: 100 },
-      { id: 'hot-new', name: 'Горячие закуски', sort_order: 101 }
+      { id: 'hot-new', name: 'Горячие закуски', sort_order: 101 },
+      { id: 'drinks-new', name: 'Напитки', sort_order: 102 }
     ]
     
     const combined = [...categoriesData]
@@ -84,6 +86,7 @@ async function loadData() {
       { id: '6', name: 'Пицца', sort_order: 6, created_at: new Date().toISOString() },
       { id: '7', name: 'Сеты', sort_order: 7, created_at: new Date().toISOString() },
       { id: '8', name: 'Горячие закуски', sort_order: 8, created_at: new Date().toISOString() },
+      { id: '9', name: 'Напитки', sort_order: 9, created_at: new Date().toISOString() },
     ]
     categories.value = mockCategories
     selectedCategory.value = mockCategories[0].id
