@@ -80,21 +80,55 @@ async function loadData() {
     .order('sort_order')
     
   if (cats) {
-    // Add requested categories if missing in DB
-    const required = [
-      { id: 'set-new', name: 'Сеты', sort_order: 100 },
-      { id: 'hot-new', name: 'Горячие закуски', sort_order: 101 },
-      { id: 'drinks-new', name: 'Напитки', sort_order: 102 }
+    // List of required categories in order
+    const requiredOrder = [
+      'Сеты',
+      'Запечённые и жареные роллы',
+      'Холодные роллы',
+      'Суши и Гунканы',
+      'Комбо',
+      'Суп',
+      'Салаты',
+      'Пиццы',
+      'Горячие закуски',
+      'Напитки',
+      'Снеки'
     ]
     
-    const combined = [...cats]
-    required.forEach(req => {
-      if (!combined.find(c => c.name === req.name)) {
-        combined.push(req)
+    // Create a map for quick lookup and fallback sort order
+    const orderMap = {}
+    requiredOrder.forEach((name, index) => {
+      orderMap[name] = index + 1
+    })
+
+    // Filter and update existing categories, and add missing ones
+    let combined = cats.map(cat => {
+      // Map old names if they exist (heuristics)
+      if (cat.name === 'Запечённые роллы') cat.name = 'Запечённые и жареные роллы'
+      if (cat.name === 'Супы') cat.name = 'Суп'
+      if (cat.name === 'Пицца') cat.name = 'Пиццы'
+      if (cat.name === 'Суши и роллы') cat.name = 'Холодные роллы'
+      if (cat.name === 'Маки') cat.name = 'Суши и Гунканы'
+      
+      // Update sort order based on our mapping if name matches
+      if (orderMap[cat.name]) {
+        cat.sort_order = orderMap[cat.name]
+      }
+      return cat
+    })
+
+    // Add missing required categories
+    requiredOrder.forEach((name, index) => {
+      if (!combined.find(c => c.name === name)) {
+        combined.push({
+          id: `new-${index}`,
+          name: name,
+          sort_order: index + 1
+        })
       }
     })
     
-    categories.value = combined.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    categories.value = combined.sort((a, b) => (a.sort_order || 999) - (b.sort_order || 999))
     if (!selectedCategory.value && combined.length > 0) {
       selectedCategory.value = combined[0].id
     }

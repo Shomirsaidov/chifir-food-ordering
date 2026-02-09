@@ -15,15 +15,17 @@ const searchQuery = ref('')
 const isSearchOpen = ref(false) // New state for search toggle
 
 const categoryEmojis = {
-  'Суши и роллы': '🍣',
-  'Маки': '🍱',
-  'Запечённые роллы': '🔥',
-  'Супы': '🍜',
-  'Салаты': '🥗',
-  'Пицца': '🍕',
   'Сеты': '🍱',
+  'Запечённые и жареные роллы': '🔥',
+  'Холодные роллы': '🍣',
+  'Суши и Гунканы': '🍱',
+  'Комбо': '🍱',
+  'Суп': '🍜',
+  'Салаты': '🥗',
+  'Пиццы': '🍕',
   'Горячие закуски': '🥘',
   'Напитки': '🥤',
+  'Снеки': '🍟',
   'default': '🍽️'
 }
 
@@ -56,21 +58,55 @@ async function loadData() {
     .order('sort_order')
 
   if (categoriesData && categoriesData.length > 0) {
-    // Add requested categories if missing in DB
-    const required = [
-      { id: 'set-new', name: 'Сеты', sort_order: 100 },
-      { id: 'hot-new', name: 'Горячие закуски', sort_order: 101 },
-      { id: 'drinks-new', name: 'Напитки', sort_order: 102 }
+    // List of required categories in order
+    const requiredOrder = [
+      'Сеты',
+      'Запечённые и жареные роллы',
+      'Холодные роллы',
+      'Суши и Гунканы',
+      'Комбо',
+      'Суп',
+      'Салаты',
+      'Пиццы',
+      'Горячие закуски',
+      'Напитки',
+      'Снеки'
     ]
     
-    const combined = [...categoriesData]
-    required.forEach(req => {
-      if (!combined.find(c => c.name === req.name)) {
-        combined.push(req)
+    // Create a map for quick lookup and fallback sort order
+    const orderMap = {}
+    requiredOrder.forEach((name, index) => {
+      orderMap[name] = index + 1
+    })
+
+    // Filter and update existing categories, and add missing ones
+    let combined = categoriesData.map(cat => {
+      // Map old names if they exist (heuristics)
+      if (cat.name === 'Запечённые роллы') cat.name = 'Запечённые и жареные роллы'
+      if (cat.name === 'Супы') cat.name = 'Суп'
+      if (cat.name === 'Пицца') cat.name = 'Пиццы'
+      if (cat.name === 'Суши и роллы') cat.name = 'Холодные роллы'
+      if (cat.name === 'Маки') cat.name = 'Суши и Гунканы'
+      
+      // Update sort order based on our mapping if name matches
+      if (orderMap[cat.name]) {
+        cat.sort_order = orderMap[cat.name]
+      }
+      return cat
+    })
+
+    // Add missing required categories
+    requiredOrder.forEach((name, index) => {
+      if (!combined.find(c => c.name === name)) {
+        combined.push({
+          id: `new-${index}`,
+          name: name,
+          sort_order: index + 1
+        })
       }
     })
     
-    categories.value = combined.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+    categories.value = combined.sort((a, b) => (a.sort_order || 999) - (b.sort_order || 999))
     
     if (combined.length > 0 && !selectedCategory.value) {
       selectedCategory.value = combined[0].id
@@ -78,15 +114,17 @@ async function loadData() {
   } else {
     // Use mock data for development
     const mockCategories = [
-      { id: '1', name: 'Суши и роллы', sort_order: 1, created_at: new Date().toISOString() },
-      { id: '2', name: 'Маки', sort_order: 2, created_at: new Date().toISOString() },
-      { id: '3', name: 'Запечённые роллы', sort_order: 3, created_at: new Date().toISOString() },
-      { id: '4', name: 'Супы', sort_order: 4, created_at: new Date().toISOString() },
-      { id: '5', name: 'Салаты', sort_order: 5, created_at: new Date().toISOString() },
-      { id: '6', name: 'Пицца', sort_order: 6, created_at: new Date().toISOString() },
-      { id: '7', name: 'Сеты', sort_order: 7, created_at: new Date().toISOString() },
-      { id: '8', name: 'Горячие закуски', sort_order: 8, created_at: new Date().toISOString() },
-      { id: '9', name: 'Напитки', sort_order: 9, created_at: new Date().toISOString() },
+      { id: '1', name: 'Сеты', sort_order: 1, created_at: new Date().toISOString() },
+      { id: '2', name: 'Запечённые и жареные роллы', sort_order: 2, created_at: new Date().toISOString() },
+      { id: '3', name: 'Холодные роллы', sort_order: 3, created_at: new Date().toISOString() },
+      { id: '4', name: 'Суши и Гунканы', sort_order: 4, created_at: new Date().toISOString() },
+      { id: '5', name: 'Комбо', sort_order: 5, created_at: new Date().toISOString() },
+      { id: '6', name: 'Суп', sort_order: 6, created_at: new Date().toISOString() },
+      { id: '7', name: 'Салаты', sort_order: 7, created_at: new Date().toISOString() },
+      { id: '8', name: 'Пиццы', sort_order: 8, created_at: new Date().toISOString() },
+      { id: '9', name: 'Горячие закуски', sort_order: 9, created_at: new Date().toISOString() },
+      { id: '10', name: 'Напитки', sort_order: 10, created_at: new Date().toISOString() },
+      { id: '11', name: 'Снеки', sort_order: 11, created_at: new Date().toISOString() },
     ]
     categories.value = mockCategories
     selectedCategory.value = mockCategories[0].id

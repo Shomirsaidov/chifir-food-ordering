@@ -30,7 +30,17 @@
         <div v-for="order in group" :key="order.id" class="order-card" :class="order.status">
           <div class="order-header">
             <span class="order-id">#{{ order.id.slice(0, 8) }}</span>
-            <span class="order-time">{{ formatTime(order.created_at) }}</span>
+            <div class="header-right">
+              <span class="order-time">{{ formatTime(order.created_at) }}</span>
+              <button 
+                v-if="order.status === 'completed'" 
+                @click.stop="deleteOrder(order.id)" 
+                class="delete-order-btn"
+                title="Удалить заказ"
+              >
+                🗑
+              </button>
+            </div>
           </div>
           
           <div class="order-details">
@@ -189,6 +199,21 @@ async function updateStatus(orderId, status) {
   loadOrders()
 }
 
+async function deleteOrder(orderId) {
+  if (!confirm('Вы уверены, что хотите удалить этот заказ?')) return
+  
+  const { error } = await supabase
+    .from('orders')
+    .delete()
+    .eq('id', orderId)
+    
+  if (error) {
+    alert('Ошибка при удалении: ' + error.message)
+  } else {
+    orders.value = orders.value.filter(o => o.id !== orderId)
+  }
+}
+
 function formatTime(dateStr) {
   return new Date(dateStr).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 }
@@ -334,9 +359,31 @@ h1 {
 .order-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
   color: var(--color-text-secondary);
   font-size: 12px;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.delete-order-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 16px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.delete-order-btn:hover {
+  opacity: 1;
 }
 
 .table-number {
