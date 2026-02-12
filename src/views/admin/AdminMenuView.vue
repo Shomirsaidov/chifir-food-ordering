@@ -118,15 +118,34 @@ async function loadData() {
     })
 
     // Add missing required categories
+    // Add missing required categories and create them in Supabase if needed
+    const missingCategories = []
+    
     requiredOrder.forEach((name, index) => {
       if (!combined.find(c => c.name === name)) {
-        combined.push({
-          id: `new-${index}`,
+        missingCategories.push({
           name: name,
           sort_order: index + 1
         })
       }
     })
+
+    if (missingCategories.length > 0) {
+      try {
+        const { data: newCats, error: createError } = await supabase
+          .from('categories')
+          .insert(missingCategories)
+          .select()
+        
+        if (createError) {
+          console.error('Error creating default categories:', createError)
+        } else if (newCats) {
+          combined.push(...newCats)
+        }
+      } catch (e) {
+        console.error('Exception creating categories:', e)
+      }
+    }
     
     categories.value = combined.sort((a, b) => (a.sort_order || 999) - (b.sort_order || 999))
     if (!selectedCategory.value && combined.length > 0) {
