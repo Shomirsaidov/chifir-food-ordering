@@ -185,50 +185,39 @@ ${itemsList}
 Спасибо за заказ. Вы сделали уже ${totalOrdersCount} заказов.
 `.trim()
 
-    try {
-        const url = BOT_API_URL
-            ? `${BOT_API_URL}/api/notify`
-            : `https://api.telegram.org/bot8414786040:AAFrMCdsKFZCn1z8BEZJe2BbA_IJ0n23LPY/sendMessage`
-
-        const payload = {
-            text,
-            parse_mode: 'HTML'
-        }
-
-        // Send to user
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...payload,
-                chat_id: chat_id,
-            })
-        })
-
-        // Also send to Admin
-        const admin_id = '8598361161'
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...payload,
-                chat_id: admin_id,
-            })
-        })
-
-        // Send to specified ID (Requested by user)
-        const target_id = '7130452492'
-        await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                ...payload,
-                chat_id: target_id,
-            })
-        })
-    } catch (e) {
-        console.error('Failed to send Telegram notification:', e)
+    const payload = {
+        text,
+        parse_mode: 'HTML'
     }
+
+    const url = BOT_API_URL
+        ? `${BOT_API_URL}/api/notify`
+        : `https://api.telegram.org/bot8414786040:AAFrMCdsKFZCn1z8BEZJe2BbA_IJ0n23LPY/sendMessage`
+
+    // Internal helper for non-blocking sends
+    const sendToChat = async (targetChatId) => {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...payload,
+                    chat_id: targetChatId.toString(),
+                })
+            })
+            if (!response.ok) {
+                const errData = await response.json().catch(() => ({}))
+                console.warn(`Telegram notification to ${targetChatId} failed:`, errData)
+            }
+        } catch (e) {
+            console.error(`Failed to send Telegram notification to ${targetChatId}:`, e)
+        }
+    }
+
+    // Fire and forget (don't await these to prevent blocking the UI)
+    sendToChat(chat_id) // User
+    sendToChat('8598361161') // Admin 1
+    sendToChat('7130452492') // Admin 2 / Target ID
 }
 
 export { webApp }
