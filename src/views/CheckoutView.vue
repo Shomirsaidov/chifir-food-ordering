@@ -117,17 +117,22 @@ async function submitOrder() {
 
     if (orderError) throw orderError
 
-    // Helper to validate UUID
-    const isUUID = (uuid) => {
+    // Helper to validate UUID and ensure it's not a mock ID
+    const isRealUUID = (uuid) => {
       if (typeof uuid !== 'string') return false
+      // Check if it's a valid UUID
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      return uuidRegex.test(uuid)
+      if (!uuidRegex.test(uuid)) return false
+      
+      // Check if it's one of our mock IDs (starts with c111, c222, etc. or 11111111, 22222222, etc.)
+      const isMock = /^(c?[0-9a-f])\1{7}-/.test(uuid)
+      return !isMock
     }
 
     // Create Items
     const orderItems = cartStore.items.map((item) => ({
       order_id: order.id,
-      menu_item_id: isUUID(item.menuItem.id) ? item.menuItem.id : null,
+      menu_item_id: isRealUUID(item.menuItem.id) ? item.menuItem.id : null,
       menu_item_name: item.menuItem.name,
       quantity: item.quantity,
       price: item.menuItem.price,
