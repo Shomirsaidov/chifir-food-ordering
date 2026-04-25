@@ -38,10 +38,16 @@ CREATE TABLE IF NOT EXISTS menu_items (
 CREATE TABLE IF NOT EXISTS orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-  table_location TEXT NOT NULL,
+  delivery_type TEXT NOT NULL DEFAULT 'delivery',
+  phone_number TEXT,
+  payment_method TEXT,
+  utensils_count INTEGER DEFAULT 1,
+  cash_change_from TEXT,
   comment TEXT,
   total_amount INTEGER NOT NULL,
-  status TEXT NOT NULL CHECK (status IN ('new', 'confirmed', 'cooking', 'ready', 'courier', 'delivery', 'completed', 'cancelled')),
+  status TEXT NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'confirmed', 'cooking', 'ready', 'courier', 'delivery', 'completed', 'cancelled')),
+  delivery_address TEXT,
+  delivery_coordinates JSONB,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -74,31 +80,35 @@ CREATE POLICY "Anyone can view admins" ON admins FOR SELECT USING (true);
 
 -- RLS Policies for categories table
 CREATE POLICY "Anyone can view categories" ON categories FOR SELECT USING (true);
-CREATE POLICY "Only service role can modify categories" ON categories FOR ALL USING (false);
 
 -- RLS Policies for menu_items table
 CREATE POLICY "Anyone can view active menu items" ON menu_items FOR SELECT USING (is_active = true);
-CREATE POLICY "Only service role can modify menu items" ON menu_items FOR ALL USING (false);
 
 -- RLS Policies for orders table
 CREATE POLICY "Users can view their own orders" ON orders FOR SELECT USING (true);
 CREATE POLICY "Users can create orders" ON orders FOR INSERT WITH CHECK (true);
-CREATE POLICY "Only service role can update orders" ON orders FOR UPDATE USING (false);
+CREATE POLICY "Users can update their own orders" ON orders FOR UPDATE USING (true);
 
 -- RLS Policies for order_items table
 CREATE POLICY "Users can view order items" ON order_items FOR SELECT USING (true);
 CREATE POLICY "Users can create order items" ON order_items FOR INSERT WITH CHECK (true);
 
 -- Enable Realtime for orders table
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+        CREATE PUBLICATION supabase_realtime;
+    END IF;
+END $$;
 ALTER PUBLICATION supabase_realtime ADD TABLE orders;
 
 -- Create indexes for better performance
-CREATE INDEX idx_users_telegram_id ON users(telegram_id);
-CREATE INDEX idx_menu_items_category_id ON menu_items(category_id);
-CREATE INDEX idx_menu_items_is_active ON menu_items(is_active);
-CREATE INDEX idx_orders_user_id ON orders(user_id);
-CREATE INDEX idx_orders_status ON orders(status);
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_users_telegram_id ON users(telegram_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_category_id ON menu_items(category_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_is_active ON menu_items(is_active);
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
 
 -- Seed initial categories
 INSERT INTO categories (name, sort_order) VALUES
@@ -110,8 +120,7 @@ INSERT INTO categories (name, sort_order) VALUES
   ('Пицца', 6)
 ON CONFLICT DO NOTHING;
 
--- Seed initial menu items (prices in kopeks/cents)
--- Get category IDs
+-- Seed initial menu items
 DO $$
 DECLARE
   cat_sushi UUID;
@@ -173,6 +182,3 @@ BEGIN
     (cat_pizza, 'Пицца Немецкая', 'сосиски, картошка фри, ветчина', 63000, 5)
   ON CONFLICT DO NOTHING;
 END $$;
-
--- Insert example admin (replace with actual admin username)
--- INSERT INTO admins (telegram_username) VALUES ('your_telegram_username');

@@ -144,17 +144,17 @@ async function loadData() {
   } else {
     // Use mock data for development
     const mockCategories = [
-      { id: '1', name: 'Сеты', sort_order: 1, created_at: new Date().toISOString() },
-      { id: '2', name: 'Запечённые и жареные роллы', sort_order: 2, created_at: new Date().toISOString() },
-      { id: '3', name: 'Холодные роллы', sort_order: 3, created_at: new Date().toISOString() },
-      { id: '4', name: 'Суши и Гунканы', sort_order: 4, created_at: new Date().toISOString() },
-      { id: '5', name: 'Комбо', sort_order: 5, created_at: new Date().toISOString() },
-      { id: '6', name: 'Суп', sort_order: 6, created_at: new Date().toISOString() },
-      { id: '7', name: 'Салаты', sort_order: 7, created_at: new Date().toISOString() },
-      { id: '8', name: 'Пиццы', sort_order: 8, created_at: new Date().toISOString() },
-      { id: '9', name: 'Горячие закуски', sort_order: 9, created_at: new Date().toISOString() },
-      { id: '10', name: 'Напитки', sort_order: 10, created_at: new Date().toISOString() },
-      { id: '11', name: 'Снеки', sort_order: 11, created_at: new Date().toISOString() },
+      { id: '11111111-1111-1111-1111-111111111111', name: 'Сеты', sort_order: 1, created_at: new Date().toISOString() },
+      { id: '22222222-2222-2222-2222-222222222222', name: 'Запечённые и жареные роллы', sort_order: 2, created_at: new Date().toISOString() },
+      { id: '33333333-3333-3333-3333-333333333333', name: 'Холодные роллы', sort_order: 3, created_at: new Date().toISOString() },
+      { id: '44444444-4444-4444-4444-444444444444', name: 'Суши и Гунканы', sort_order: 4, created_at: new Date().toISOString() },
+      { id: '55555555-5555-5555-5555-555555555555', name: 'Комбо', sort_order: 5, created_at: new Date().toISOString() },
+      { id: '66666666-6666-6666-6666-666666666666', name: 'Суп', sort_order: 6, created_at: new Date().toISOString() },
+      { id: '77777777-7777-7777-7777-777777777777', name: 'Салаты', sort_order: 7, created_at: new Date().toISOString() },
+      { id: '88888888-8888-8888-8888-888888888888', name: 'Пиццы', sort_order: 8, created_at: new Date().toISOString() },
+      { id: '99999999-9999-9999-9999-999999999999', name: 'Горячие закуски', sort_order: 9, created_at: new Date().toISOString() },
+      { id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', name: 'Напитки', sort_order: 10, created_at: new Date().toISOString() },
+      { id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', name: 'Снеки', sort_order: 11, created_at: new Date().toISOString() },
     ]
     categories.value = mockCategories
     selectedCategory.value = mockCategories[0].id
@@ -172,15 +172,15 @@ async function loadData() {
   } else {
     // Use mock data for development
     const mockItems = [
-      { id: '1', category_id: '1', name: 'Фила лайт', description: 'Лосось, сливочный сыр, огурец', price: 61500, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '2', category_id: '1', name: 'Фила классика', description: 'Лосось, сливочный сыр, авокадо', price: 74900, image_url: null, image_loc: null, is_active: true, sort_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '3', category_id: '1', name: 'Калифорния с крабом', description: 'Краб, авокадо, огурец, икра тобико', price: 49300, image_url: null, image_loc: null, is_active: true, sort_order: 3, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '4', category_id: '2', name: 'Каппа маки', description: 'Огурец', price: 26500, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '5', category_id: '2', name: 'Сяке Маки', description: 'Лосось', price: 31300, image_url: null, image_loc: null, is_active: true, sort_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '6', category_id: '3', name: 'Запечённый с курицей', description: 'Курица, сливочный сыр, соус', price: 42900, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '7', category_id: '4', name: 'Том Ям', description: 'Острый тайский суп с морепродуктами', price: 75600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '8', category_id: '5', name: 'Салат Цезарь', description: 'Курица, салат, пармезан, соус цезарь', price: 45600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { id: '9', category_id: '6', name: 'Пицца Мясная', description: 'Колбаса, курица, сосиски, салями', price: 75600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c1111111-1111-1111-1111-111111111111', category_id: '11111111-1111-1111-1111-111111111111', name: 'Фила лайт', description: 'Лосось, сливочный сыр, огурец', price: 61500, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c2222222-2222-2222-2222-222222222222', category_id: '11111111-1111-1111-1111-111111111111', name: 'Фила классика', description: 'Лосось, сливочный сыр, авокадо', price: 74900, image_url: null, image_loc: null, is_active: true, sort_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c3333333-3333-3333-3333-333333333333', category_id: '11111111-1111-1111-1111-111111111111', name: 'Калифорния с крабом', description: 'Краб, авокадо, огурец, икра тобико', price: 49300, image_url: null, image_loc: null, is_active: true, sort_order: 3, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c4444444-4444-4444-4444-444444444444', category_id: '44444444-4444-4444-4444-444444444444', name: 'Каппа маки', description: 'Огурец', price: 26500, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c5555555-5555-5555-5555-555555555555', category_id: '44444444-4444-4444-4444-444444444444', name: 'Сяке Маки', description: 'Лосось', price: 31300, image_url: null, image_loc: null, is_active: true, sort_order: 2, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c6666666-6666-6666-6666-666666666666', category_id: '22222222-2222-2222-2222-222222222222', name: 'Запечённый с курицей', description: 'Курица, сливочный сыр, соус', price: 42900, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c7777777-7777-7777-7777-777777777777', category_id: '66666666-6666-6666-6666-666666666666', name: 'Том Ям', description: 'Острый тайский суп с морепродуктами', price: 75600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c8888888-8888-8888-8888-888888888888', category_id: '77777777-7777-7777-7777-777777777777', name: 'Салат Цезарь', description: 'Курица, салат, пармезан, соус цезарь', price: 45600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+      { id: 'c9999999-9999-9999-9999-999999999999', category_id: '88888888-8888-8888-8888-888888888888', name: 'Пицца Мясная', description: 'Колбаса, курица, сосиски, салями', price: 75600, image_url: null, image_loc: null, is_active: true, sort_order: 1, created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
     ]
     menuItems.value = mockItems
   }
