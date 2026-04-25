@@ -117,10 +117,17 @@ async function submitOrder() {
 
     if (orderError) throw orderError
 
+    // Helper to validate UUID
+    const isUUID = (uuid) => {
+      if (typeof uuid !== 'string') return false
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      return uuidRegex.test(uuid)
+    }
+
     // Create Items
     const orderItems = cartStore.items.map((item) => ({
       order_id: order.id,
-      menu_item_id: item.menuItem.id,
+      menu_item_id: isUUID(item.menuItem.id) ? item.menuItem.id : null,
       menu_item_name: item.menuItem.name,
       quantity: item.quantity,
       price: item.menuItem.price,
