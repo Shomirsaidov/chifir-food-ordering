@@ -214,10 +214,13 @@ ${itemsList}
         }
     }
 
-    // Fire and forget (don't await these to prevent blocking the UI)
-    sendToChat(chat_id) // User
-    sendToChat('8598361161') // Admin 1
-    sendToChat('7130452492') // Admin 2 / Target ID
+    // Send notifications to all recipients and wait for them to finish
+    // This prevents the requests from being cancelled when the page navigates away
+    await Promise.allSettled([
+        sendToChat(chat_id),      // User
+        sendToChat('8598361161'), // Admin 1
+        sendToChat('7130452492')  // Admin 2 / User target
+    ])
 }
 
 export { webApp }
