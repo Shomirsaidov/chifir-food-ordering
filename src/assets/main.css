@@ -66,6 +66,43 @@
   --header-height: 60px;
 }
 
+:root.light-mode {
+  --color-primary: #f8fafc;
+  --color-secondary: #ffffff;
+  --color-surface: #f1f5f9;
+  --color-accent: #3b82f6;
+  --color-accent-hover: #2563eb;
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border: #e2e8f0;
+}
+
+:root.light-mode .glass {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--color-text);
+}
+
+:root.light-mode .card {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+:root.light-mode .header {
+  background: rgba(248, 250, 252, 0.8) !important;
+}
+
+:root.light-mode .category-pill {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+:root.light-mode .category-pill.active {
+    background: var(--color-accent);
+    color: white;
+}
+
+
 * {
   margin: 0;
   padding: 0;

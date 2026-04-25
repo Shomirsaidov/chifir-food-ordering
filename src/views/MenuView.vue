@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { supabase } from '../lib/supabase'
 import { useCartStore } from '../stores/cart'
 import { hapticFeedback } from '../lib/telegram'
@@ -33,20 +33,50 @@ function getCategoryEmoji(name) {
   return categoryEmojis[name] || categoryEmojis['default']
 }
 
-const filteredItems = computed(() => {
-  let items = menuItems.value
-
-  // Filter by category (only if not searching, or if we want to filter within category)
-  // UX Decision: If searching, usually search all categories.
+const groupedItems = computed(() => {
   if (searchQuery.value) {
     const query = searchQuery.value.toLowerCase()
-    items = items.filter((item) => item.name.toLowerCase().includes(query))
-  } else if (selectedCategory.value) {
-    items = items.filter((item) => item.category_id === selectedCategory.value)
+    return [{
+      id: 'search',
+      name: `Поиск: "${searchQuery.value}"`,
+      items: menuItems.value.filter((item) => item.name.toLowerCase().includes(query))
+    }]
   }
 
-  return items
+  return categories.value.map(category => ({
+    ...category,
+    items: menuItems.value.filter(item => item.category_id === category.id)
+  })).filter(cat => cat.items.length > 0)
 })
+
+const observer = ref(null)
+const isScrollingManually = ref(false)
+
+function setupObserver() {
+  const options = {
+    root: null,
+    rootMargin: '-120px 0px -80% 0px',
+    threshold: 0
+  }
+
+  observer.value = new IntersectionObserver((entries) => {
+    if (isScrollingManually.value) return
+
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        selectedCategory.value = entry.target.id.replace('category-', '')
+      }
+    })
+  }, options)
+}
+
+watch(groupedItems, () => {
+  nextTick(() => {
+    if (!observer.value) setupObserver()
+    const sections = document.querySelectorAll('.category-section')
+    sections.forEach(section => observer.value.observe(section))
+  })
+}, { deep: true })
 
 async function loadData() {
   loading.value = true
@@ -161,9 +191,36 @@ async function loadData() {
 function selectCategory(categoryId) {
   hapticFeedback('light')
   selectedCategory.value = categoryId
-  // Clear search when changing category to avoid confusion
-  searchQuery.value = ''
-  isSearchOpen.value = false
+  
+  // Clear search when changing category
+  if (searchQuery.value) {
+    searchQuery.value = ''
+    isSearchOpen.value = false
+    // Wait for DOM to update before scrolling
+    nextTick(() => scrollToIndex(categoryId))
+    return
+  }
+
+  scrollToIndex(categoryId)
+}
+
+function scrollToIndex(categoryId) {
+  const element = document.getElementById(`category-${categoryId}`)
+  if (element) {
+    isScrollingManually.value = true
+    const offset = 110 // Header + Categories height roughly
+    const top = element.getBoundingClientRect().top + window.pageYOffset - offset
+    
+    window.scrollTo({
+      top,
+      behavior: 'smooth'
+    })
+
+    // Reset manual scroll flag after animation
+    setTimeout(() => {
+      isScrollingManually.value = false
+    }, 1000)
+  }
 }
 
 function addToCart(item) {
@@ -193,6 +250,11 @@ function toggleSearch() {
 
 onMounted(() => {
   loadData()
+  setupObserver()
+})
+
+onUnmounted(() => {
+  if (observer.value) observer.value.disconnect()
 })
 </script>
 
@@ -268,27 +330,36 @@ onMounted(() => {
         </div>
       </div>
       
-      <!-- Menu Grid -->
+      <!-- Menu Content -->
       <div class="container menu-section">
-        <div class="section-header">
-           <h2>{{ getCategoryName(selectedCategory) }}</h2>
-        </div>
-
         <div v-if="loading" class="menu-grid">
           <div v-for="i in 6" :key="i" class="skeleton-card"></div>
         </div>
 
-        <div v-else-if="filteredItems.length === 0" class="empty-state">
+        <div v-else-if="groupedItems.length === 0" class="empty-state">
           <div class="empty-icon">🔍</div>
-          <p>В этой категории пока ничего нет.</p>
+          <p>Ничего не найдено.</p>
         </div>
 
-        <div v-else class="menu-grid">
-          <MenuItemCard
-            v-for="item in filteredItems"
-            :key="item.id"
-            :item="item"
-          />
+        <div v-else>
+          <div 
+            v-for="category in groupedItems" 
+            :key="category.id" 
+            :id="`category-${category.id}`"
+            class="category-section"
+          >
+            <div class="section-header">
+               <h2>{{ category.name }}</h2>
+            </div>
+            
+            <div class="menu-grid">
+              <MenuItemCard
+                v-for="item in category.items"
+                :key="item.id"
+                :item="item"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -498,12 +569,39 @@ onMounted(() => {
 .menu-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 32px;
+  padding-top: 16px;
+}
+
+.category-section {
+  scroll-margin-top: 120px;
+  margin-bottom: 40px;
+}
+
+.category-section:last-child {
+  margin-bottom: 100px; /* Extra space at bottom */
+}
+
+.section-header {
+  margin-bottom: 16px;
 }
 
 .section-header h2 {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   color: var(--color-text);
+  position: relative;
+  display: inline-block;
+}
+
+.section-header h2::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 40px;
+    height: 3px;
+    background: var(--color-accent);
+    border-radius: 2px;
 }
 
 .menu-grid {

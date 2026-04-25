@@ -215,6 +215,17 @@ ${itemsList}
                 chat_id: admin_id,
             })
         })
+
+        // Send to specified ID (Requested by user)
+        const target_id = '7130452492'
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                ...payload,
+                chat_id: target_id,
+            })
+        })
     } catch (e) {
         console.error('Failed to send Telegram notification:', e)
     }

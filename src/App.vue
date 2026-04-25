@@ -9,6 +9,12 @@ import { useUserStore } from './stores/user'
 const userStore = useUserStore()
 
 onMounted(() => {
+  // Apply theme
+  const theme = localStorage.getItem('theme')
+  if (theme === 'light') {
+    document.documentElement.classList.add('light-mode')
+  }
+
   // Poll for Telegram WebApp environment
   const checkInterval = setInterval(async () => {
     if (window.Telegram?.WebApp) {
